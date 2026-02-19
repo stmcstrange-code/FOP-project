@@ -9,6 +9,8 @@ void executeNext(ProgramManager& pm, Sprite& s, int& currentStep) {
     if (currentStep >= (int)pm.script.size()) return;
 
     Block& b = pm.script[currentStep];
+    bool jumped = false;
+
     switch (b.type) {
         case MOVE:     s.move(b.value); break;
         case TURN:     s.rotate(b.value); break;
@@ -17,21 +19,27 @@ void executeNext(ProgramManager& pm, Sprite& s, int& currentStep) {
         case ERASE:    s.clearTrail(); break;
 
         case REPEAT:
-            b.iterations = 0;
+
             break;
 
         case END_LOOP:
-
             for (int i = currentStep - 1; i >= 0; i--) {
                 if (pm.script[i].type == REPEAT) {
                     pm.script[i].iterations++;
                     if (pm.script[i].iterations < pm.script[i].value) {
                         currentStep = i;
+                        jumped = true;
+                    } else {
+                        pm.script[i].iterations = 0;
                     }
                     break;
                 }
             }
             break;
     }
-    currentStep++;
+
+
+    if (!jumped) {
+        currentStep++;
+    }
 }
