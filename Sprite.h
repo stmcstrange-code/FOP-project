@@ -1,0 +1,32 @@
+#ifndef FOP_PROJECT_SPRITE_H
+#define FOP_PROJECT_SPRITE_H
+
+#include <SDL2/SDL.h>
+#include <vector>
+#include <string>
+
+struct Point {
+    float x, y;
+};
+
+struct Sprite{
+    float x = 400.0f, y = 300.0f;
+    float angle = 0.0f;
+    bool penDown = false;
+    std::vector<Point> trail;
+    SDL_Texture* texture = nullptr;
+    int w = 50, h = 50;
+
+    void draw(SDL_Renderer* ren);
+
+    void move(float steps);
+    void rotate(float deg);
+    void clearPen();
+    void clearTrail();
+
+    void checkBoundaries(int screenW, int screenH, int sidebarW);
+
+    bool loadBMP(SDL_Renderer* ren, const std::string& path);
+};
+
+#endif
