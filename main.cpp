@@ -14,11 +14,12 @@
 // Categories
 enum Category { MOTION, LOOKS, SOUND, EVENTS, CONTROL, SENSING, OPERATORS, VARIABLES, MY_BLOCKS };
 
-//which category a block belongs to
+// which category a block belongs to
 Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE) return LOOKS;
     if (type == REPEAT || type == END_LOOP || type == WAIT) return CONTROL;
+    if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
     return MOTION;
 }
 
@@ -46,7 +47,7 @@ int main(int argc, char* argv[]) {
 
     Category currentCategory = MOTION;
 
-    //the blocks area (gray section)
+    // Sidebar Templates
     std::vector<VisualBlock> sidebarTemplates = {
         {{MOVE, 40, 0}, {95, 60, 120, 40}, {76, 151, 255, 255}, "MOVE "},
         {{TURN, 15, 0}, {95, 110, 120, 40}, {76, 151, 255, 255}, "TURN "},
@@ -55,7 +56,9 @@ int main(int argc, char* argv[]) {
         {{ERASE, 0, 0}, {95, 160, 120, 40}, {255, 102, 102, 255}, "ERASE"},
         {{WAIT, 1, 0}, {95, 60, 120, 40}, {255, 171, 25, 255}, "WAIT "},
         {{REPEAT, 4, 0}, {95, 110, 120, 40}, {255, 171, 25, 255}, "REPEAT "},
-        {{END_LOOP, 0, 0}, {95, 160, 120, 40}, {255, 171, 25, 255}, "END LOOP"}
+        {{END_LOOP, 0, 0}, {95, 160, 120, 40}, {255, 171, 25, 255}, "END LOOP"},
+        {{SET_VAR, 0, 0}, {95, 60, 120, 40}, {255, 140, 26, 255}, "SET TO "},
+        {{CHANGE_VAR, 1, 0}, {95, 110, 120, 40}, {255, 140, 26, 255}, "CHANGE BY "}
     };
 
     struct CategoryUI {
@@ -83,7 +86,6 @@ int main(int argc, char* argv[]) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) quit = true;
 
-            //typing into blocks
             if (editingBlock) {
                 if (e.type == SDL_TEXTINPUT) {
                     if (isdigit(e.text.text[0]) || e.text.text[0] == '.') editingBlock->editBuffer += e.text.text;
@@ -91,11 +93,7 @@ int main(int argc, char* argv[]) {
                     if (e.key.keysym.sym == SDLK_BACKSPACE && !editingBlock->editBuffer.empty()) editingBlock->editBuffer.pop_back();
                     if (e.key.keysym.sym == SDLK_RETURN) {
                         if (!editingBlock->editBuffer.empty()) {
-                            try {
-                                editingBlock->data.value = std::stof(editingBlock->editBuffer);
-                            } catch (...) {
-                                editingBlock->data.value = 0;
-                            }
+                            try { editingBlock->data.value = std::stof(editingBlock->editBuffer); } catch (...) { editingBlock->data.value = 0; }
                         }
                         editingBlock->isEditing = false; editingBlock = nullptr; SDL_StopTextInput();
                     }
@@ -105,15 +103,11 @@ int main(int argc, char* argv[]) {
             if (e.type == SDL_MOUSEBUTTONDOWN) {
                 SDL_Point p = {e.button.x, e.button.y};
 
-                // Click Category
                 for(int i = 0; i < (int)catUIs.size(); i++) {
                     int cX = 40, cY = 50 + (i * 65);
-                    if (sqrt(pow(p.x - cX, 2) + pow(p.y - cY, 2)) <= 20) {
-                        currentCategory = static_cast<Category>(i);
-                    }
+                    if (sqrt(pow(p.x - cX, 2) + pow(p.y - cY, 2)) <= 20) currentCategory = static_cast<Category>(i);
                 }
 
-                // Run/Save/Load Button
                 SDL_Rect runBtn = {95, 600, 120, 35}, saveBtn = {95, 645, 120, 35}, loadBtn = {95, 690, 120, 35};
                 if (SDL_PointInRect(&p, &runBtn)) {
                     manager.script.clear();
@@ -124,11 +118,9 @@ int main(int argc, char* argv[]) {
                 else if (SDL_PointInRect(&p, &saveBtn)) saveProject(workspaceBlocks, "assets/project.txt");
                 else if (SDL_PointInRect(&p, &loadBtn)) loadProject(workspaceBlocks, "assets/project.txt");
 
-                // Dragging the Cat
                 SDL_Rect catR = {(int)cat.x-30, (int)cat.y-30, 60, 60};
                 if (SDL_PointInRect(&p, &catR)) { draggingCat = true; dragOffsetX = p.x - (int)cat.x; dragOffsetY = p.y - (int)cat.y; }
 
-                // Sidebar Templates
                 for (auto& temp : sidebarTemplates) {
                     if (getCategory(temp.data.type) == currentCategory && SDL_PointInRect(&p, &temp.rect)) {
                         VisualBlock newB = temp; newB.isDragging = true;
@@ -136,11 +128,10 @@ int main(int argc, char* argv[]) {
                         dragOffsetX = p.x - newB.rect.x; dragOffsetY = p.y - newB.rect.y;
                     }
                 }
-                // Workspace blocks
                 if (!activeDragBlock && !draggingCat) {
                     for (int i = (int)workspaceBlocks.size() - 1; i >= 0; i--) {
                         if (SDL_PointInRect(&p, &workspaceBlocks[i].rect)) {
-                            if (p.x > workspaceBlocks[i].rect.x + 80) { // Click right side for input
+                            if (p.x > workspaceBlocks[i].rect.x + 80) {
                                 editingBlock = &workspaceBlocks[i]; editingBlock->isEditing = true;
                                 editingBlock->editBuffer = ""; SDL_StartTextInput();
                             } else {
@@ -183,53 +174,42 @@ int main(int argc, char* argv[]) {
 
         SDL_SetRenderDrawColor(ren, 240, 240, 240, 255); SDL_RenderClear(ren);
 
-        // Sidebar Layers
         SDL_Rect toolbar = {0,0,80,768}, blocksArea = {80,0,150,768}, stage = {800,0,224,768};
         SDL_SetRenderDrawColor(ren, 255,255,255,255); SDL_RenderFillRect(ren, &toolbar);
         SDL_SetRenderDrawColor(ren, 225,225,225,255); SDL_RenderFillRect(ren, &blocksArea);
         SDL_SetRenderDrawColor(ren, 245,245,245,255); SDL_RenderFillRect(ren, &stage);
 
-        // Category Circles and Labels
+
+
         for (int i = 0; i < (int)catUIs.size(); i++) {
             int cX = 40, cY = 50 + (i * 65);
-            if (currentCategory == i) { //highlight
-                aacircleRGBA(ren, cX, cY, 23, 0, 0, 0, 100);
-            }
+            if (currentCategory == i) aacircleRGBA(ren, cX, cY, 23, 0, 0, 0, 100);
             filledCircleRGBA(ren, cX, cY, 20, catUIs[i].color.r, catUIs[i].color.g, catUIs[i].color.b, 255);
             renderText(ren, font, catUIs[i].name, cX, cY + 22, {80, 80, 80, 255}, true);
         }
 
-        // Templates
         for (auto& b : sidebarTemplates) {
             if (getCategory(b.data.type) == currentCategory) {
                 SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
-                std::string lbl = b.label + ((b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT) ? std::to_string((int)b.data.value) : "");
+                bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR);
+                std::string lbl = b.label + (hasNum ? std::to_string((int)b.data.value) : "");
                 renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
         }
 
-        // Workspace
         for (auto& b : workspaceBlocks) {
             SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
             std::string t = b.label;
-            if (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT)
-                t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
+            bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR);
+            if (hasNum) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
             renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
         }
 
-        // UI Buttons
-        SDL_Rect runBtnRect = {95, 600, 120, 35};
-        SDL_Rect saveBtnRect = {95, 645, 120, 35};
-        SDL_Rect loadBtnRect = {95, 690, 120, 35};
-
-        SDL_SetRenderDrawColor(ren, 50, 200, 50, 255);
-        SDL_RenderFillRect(ren, &runBtnRect);
+        SDL_Rect runBtnRect = {95, 600, 120, 35}, saveBtnRect = {95, 645, 120, 35}, loadBtnRect = {95, 690, 120, 35};
+        SDL_SetRenderDrawColor(ren, 50, 200, 50, 255); SDL_RenderFillRect(ren, &runBtnRect);
         renderText(ren, font, "GO / RUN", 155, 610, {255, 255, 255, 255}, true);
-
-        SDL_SetRenderDrawColor(ren, 100, 100, 100, 255);
-        SDL_RenderFillRect(ren, &saveBtnRect);
+        SDL_SetRenderDrawColor(ren, 100, 100, 100, 255); SDL_RenderFillRect(ren, &saveBtnRect);
         renderText(ren, font, "SAVE", 155, 655, {255, 255, 255, 255}, true);
-
         SDL_RenderFillRect(ren, &loadBtnRect);
         renderText(ren, font, "LOAD", 155, 700, {255, 255, 255, 255}, true);
 

@@ -21,6 +21,14 @@ void executeNext(ProgramManager& pm, Sprite& s, int& currentStep) {
         case PEN_UP:   s.penDown = false; break;
         case ERASE:    s.clearTrail(); break;
         case REPEAT:   break;
+        case SET_VAR:
+
+        pm.variables.vars["my variable"] = b.value;
+            break;
+
+        case CHANGE_VAR:
+            pm.variables.vars["my variable"] += b.value;
+            break;
         case END_LOOP:
             for (int i = currentStep - 1; i >= 0; i--) {
                 if (pm.script[i].type == REPEAT) {

@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 #include <SDL2/SDL.h>
+#include <map>
+#include <string>
 
 
 enum BlockType {
@@ -16,7 +18,9 @@ enum BlockType {
     ERASE,
     REPEAT,
     END_LOOP,
-    WAIT
+    WAIT,
+    SET_VAR,
+    CHANGE_VAR
 };
 
 
@@ -37,8 +41,15 @@ struct VisualBlock {
     std::string editBuffer;
 };
 
+
+struct VariableManager {
+    std::map<std::string, float> vars;
+    VariableManager() { vars["my variable"] = 0.0f; }
+};
+
 struct ProgramManager {
     std::vector<Block> script;
+    VariableManager variables;
 };
 
 struct Sprite;
