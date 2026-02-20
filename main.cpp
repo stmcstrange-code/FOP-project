@@ -20,6 +20,7 @@ Category getCategory(BlockType type) {
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE) return LOOKS;
     if (type == REPEAT || type == END_LOOP || type == WAIT) return CONTROL;
     if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
+    if (type == PLAY_SOUND) return SOUND;
     return MOTION;
 }
 
@@ -37,8 +38,13 @@ void renderText(SDL_Renderer* ren, TTF_Font* font, std::string text, int x, int 
     SDL_DestroyTexture(tex);
 }
 
+Mix_Chunk* gSound= nullptr;
+
+
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO);
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+    gSound = Mix_LoadWAV("assets/sound.wav");
     TTF_Init();
 
     SDL_Window* win = SDL_CreateWindow("Scratch Pro", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, 0);
@@ -58,7 +64,9 @@ int main(int argc, char* argv[]) {
         {{REPEAT, 4, 0}, {95, 110, 120, 40}, {255, 171, 25, 255}, "REPEAT "},
         {{END_LOOP, 0, 0}, {95, 160, 120, 40}, {255, 171, 25, 255}, "END LOOP"},
         {{SET_VAR, 0, 0}, {95, 60, 120, 40}, {255, 140, 26, 255}, "SET TO "},
-        {{CHANGE_VAR, 1, 0}, {95, 110, 120, 40}, {255, 140, 26, 255}, "CHANGE BY "}
+        {{CHANGE_VAR, 1, 0}, {95, 110, 120, 40}, {255, 140, 26, 255}, "CHANGE BY "},
+        {{PLAY_SOUND, 0 ,0}, {95, 60, 120, 40} ,{207, 99, 207, 255}, "PLAY SOUND"},
+
     };
 
     struct CategoryUI {

@@ -20,7 +20,8 @@ enum BlockType {
     END_LOOP,
     WAIT,
     SET_VAR,
-    CHANGE_VAR
+    CHANGE_VAR,
+    PLAY_SOUND
 };
 
 

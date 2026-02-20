@@ -1,5 +1,9 @@
 #include "Block.h"
 #include "Sprite.h"
+#include <SDL2/SDL_mixer.h>
+
+extern Mix_Chunk* gSound;
+
 
 void addBlock(ProgramManager& pm, BlockType t, float v) {
     pm.script.push_back({t, v, 0});
@@ -42,6 +46,9 @@ void executeNext(ProgramManager& pm, Sprite& s, int& currentStep) {
                     break;
                 }
             }
+            break;
+
+        case PLAY_SOUND: Mix_PlayChannel(-1, gSound,0);
             break;
     }
     if (!jumped) currentStep++;
