@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     int dragOffsetX = 0, dragOffsetY = 0;
 
     Sprite cat;
-    cat.loadBMP(ren, "cat.bmp");
+     cat.loadBMP(ren, "assets/cat.bmp");
     ProgramManager manager;
     int currentStep = 0;
     bool isRunning = false, quit = false;
