@@ -10,15 +10,6 @@
 #include "FileHandler.h"
 
 
-struct VisualBlock {
-    Block data;
-    SDL_Rect rect;
-    SDL_Color color;
-    std::string label;
-    bool isDragging = false;
-};
-
-
 void renderText(SDL_Renderer* ren, TTF_Font* font, std::string text, int x, int y, SDL_Color color = {255, 255, 255, 255}) {
     if (!font) return;
     SDL_Surface* surf = TTF_RenderText_Blended(font, text.c_str(), color);
@@ -148,7 +139,7 @@ int main(int argc, char* argv[]) {
         } else isRunning = false;
 
 
-        SDL_SetRenderDrawColor(ren, 240, 240, 240, 255); // Background
+        SDL_SetRenderDrawColor(ren, 240, 240, 240, 255);
         SDL_RenderClear(ren);
 
 
