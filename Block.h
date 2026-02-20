@@ -15,7 +15,8 @@ enum BlockType {
     PEN_UP,
     ERASE,
     REPEAT,
-    END_LOOP
+    END_LOOP,
+    WAIT
 };
 
 
@@ -32,6 +33,8 @@ struct VisualBlock {
     SDL_Color color;
     std::string label;
     bool isDragging = false;
+    bool isEditing = false;
+    std::string editBuffer;
 };
 
 struct ProgramManager {

@@ -12,8 +12,6 @@ add_executable(FOP-project
         Sprite.cpp
         Sprite.h
         Sprite.h
-        main.cpp
-        main.cpp
 )
 
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/assets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")

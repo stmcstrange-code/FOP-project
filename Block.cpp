@@ -14,6 +14,9 @@ void executeNext(ProgramManager& pm, Sprite& s, int& currentStep) {
     switch (b.type) {
         case MOVE:     s.move(b.value); break;
         case TURN:     s.rotate(b.value); break;
+        case WAIT:
+            SDL_Delay(static_cast<Uint32>(b.value * 1000));
+            break;
         case PEN_DOWN: s.penDown = true; break;
         case PEN_UP:   s.penDown = false; break;
         case ERASE:    s.clearTrail(); break;

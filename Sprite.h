@@ -18,7 +18,6 @@ struct Sprite{
     int w = 50, h = 50;
 
     void draw(SDL_Renderer* ren);
-
     void move(float steps);
     void rotate(float deg);
     void clearPen();
@@ -27,6 +26,15 @@ struct Sprite{
     void checkBoundaries(int screenW, int screenH, int sidebarW);
 
     bool loadBMP(SDL_Renderer* ren, const std::string& path);
+
+
+    bool isClicked(int mx, int my) {
+        int dW = (w > 100) ? 60 : w;
+        int dH = (h > 100) ? 60 : h;
+        SDL_Rect rect = { (int)x - dW/2, (int)y - dH/2, dW, dH };
+        SDL_Point p = {mx, my};
+        return SDL_PointInRect(&p, &rect);
+    }
 };
 
 #endif
