@@ -17,11 +17,7 @@ void executeNext(ProgramManager& pm, Sprite& s, int& currentStep) {
         case PEN_DOWN: s.penDown = true; break;
         case PEN_UP:   s.penDown = false; break;
         case ERASE:    s.clearTrail(); break;
-
-        case REPEAT:
-
-            break;
-
+        case REPEAT:   break;
         case END_LOOP:
             for (int i = currentStep - 1; i >= 0; i--) {
                 if (pm.script[i].type == REPEAT) {
@@ -37,9 +33,5 @@ void executeNext(ProgramManager& pm, Sprite& s, int& currentStep) {
             }
             break;
     }
-
-
-    if (!jumped) {
-        currentStep++;
-    }
+    if (!jumped) currentStep++;
 }

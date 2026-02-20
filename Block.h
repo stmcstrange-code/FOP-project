@@ -2,14 +2,36 @@
 #ifndef FOP_PROJECT_BLOCK_H
 #define FOP_PROJECT_BLOCK_H
 
-#include <vector>
 
-enum BlockType { MOVE, TURN, PEN_DOWN, PEN_UP, ERASE, REPEAT, END_LOOP };
+#include <vector>
+#include <string>
+#include <SDL2/SDL.h>
+
+
+enum BlockType {
+    MOVE,
+    TURN,
+    PEN_DOWN,
+    PEN_UP,
+    ERASE,
+    REPEAT,
+    END_LOOP
+};
+
 
 struct Block {
     BlockType type;
     float value;
-    int iterations;
+    int iterations = 0;
+};
+
+
+struct VisualBlock {
+    Block data;
+    SDL_Rect rect;
+    SDL_Color color;
+    std::string label;
+    bool isDragging = false;
 };
 
 struct ProgramManager {
@@ -17,6 +39,7 @@ struct ProgramManager {
 };
 
 struct Sprite;
+
 
 void addBlock(ProgramManager& pm, BlockType t, float v);
 void executeNext(ProgramManager& pm, Sprite& s, int& currentStep);
