@@ -11,6 +11,8 @@ add_executable(FOP-project
         Sprite.cpp
         Sprite.h
         Sprite.h
+        main.cpp
+        main.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer)
