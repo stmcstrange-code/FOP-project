@@ -7,7 +7,9 @@
 #include <string>
 #include <SDL2/SDL.h>
 #include <map>
+#pragma once
 #include <string>
+#include "Sound.h"
 
 
 enum BlockType {
@@ -21,7 +23,9 @@ enum BlockType {
     WAIT,
     SET_VAR,
     CHANGE_VAR,
-    PLAY_SOUND
+    PLAY_SOUND,
+    SET_VOLUME,
+    SET_PITCH
 };
 
 
@@ -29,6 +33,8 @@ struct Block {
     BlockType type;
     float value;
     int iterations = 0;
+
+    std::string soundName;
 };
 
 
@@ -57,7 +63,7 @@ struct Sprite;
 
 
 void addBlock(ProgramManager& pm, BlockType t, float v);
-void executeNext(ProgramManager& pm, Sprite& s, int& currentStep);
+void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& soundSystem, int& currentStep);
 
 
 #endif //FOP_PROJECT_BLOCK_H

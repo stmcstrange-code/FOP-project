@@ -11,6 +11,8 @@
 #include <SDL2/SDL2_gfx.h>
 #include <SDL2/SDL_mixer.h>
 
+#include "Sound.h"
+
 // Categories
 enum Category { MOTION, LOOKS, SOUND, EVENTS, CONTROL, SENSING, OPERATORS, VARIABLES, MY_BLOCKS };
 
@@ -20,7 +22,7 @@ Category getCategory(BlockType type) {
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE) return LOOKS;
     if (type == REPEAT || type == END_LOOP || type == WAIT) return CONTROL;
     if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
-    if (type == PLAY_SOUND) return SOUND;
+    if (type == PLAY_SOUND || type == SET_VOLUME ||type == SET_PITCH ) return SOUND;
     return MOTION;
 }
 
@@ -44,6 +46,7 @@ Mix_Chunk* gSound= nullptr;
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO);
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+    SoundSystem  soundSystem;
     gSound = Mix_LoadWAV("assets/sound.wav");
     TTF_Init();
 
@@ -66,7 +69,8 @@ int main(int argc, char* argv[]) {
         {{SET_VAR, 0, 0}, {95, 60, 120, 40}, {255, 140, 26, 255}, "SET TO "},
         {{CHANGE_VAR, 1, 0}, {95, 110, 120, 40}, {255, 140, 26, 255}, "CHANGE BY "},
         {{PLAY_SOUND, 0 ,0}, {95, 60, 120, 40} ,{207, 99, 207, 255}, "PLAY SOUND"},
-
+        {{SET_VOLUME, 50 ,0}, {95, 110, 120, 40} ,{207, 99, 207, 255}, "SET VOLUME"},
+        {{SET_PITCH, 1.0f ,0}, {95, 160, 120, 40} ,{207, 99, 207, 255}, "SET PITCH"},
     };
 
     struct CategoryUI {
@@ -177,7 +181,7 @@ int main(int argc, char* argv[]) {
         }
 
         if (isRunning && currentStep < (int)manager.script.size()) {
-            executeNext(manager, cat, currentStep); cat.checkBoundaries(800, 768, 230); SDL_Delay(100);
+            executeNext(manager, cat , soundSystem, currentStep); cat.checkBoundaries(800, 768, 230); SDL_Delay(100);
         } else isRunning = false;
 
         SDL_SetRenderDrawColor(ren, 240, 240, 240, 255); SDL_RenderClear(ren);
