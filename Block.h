@@ -32,7 +32,7 @@ struct Block {
     BlockType type;
     float value;
     int iterations = 0;
-
+    int jumpTo = -1;
     std::string soundName;
 };
 
@@ -63,6 +63,7 @@ struct Sprite;
 
 void addBlock(ProgramManager& pm, BlockType t, float v);
 void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& soundSystem, int& currentStep);
+void preprocessScript(ProgramManager& pm);
 
 
 #endif //FOP_PROJECT_BLOCK_H

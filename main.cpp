@@ -129,7 +129,9 @@ int main(int argc, char* argv[]) {
                     manager.script.clear();
                     std::sort(workspaceBlocks.begin(), workspaceBlocks.end(), [](const VisualBlock& a, const VisualBlock& b) { return a.rect.y < b.rect.y; });
                     for (auto& vb : workspaceBlocks) manager.script.push_back(vb.data);
-                    isRunning = true; currentStep = 0;
+                    preprocessScript(manager);
+                    isRunning = true;
+                    currentStep = 0;
                 }
                 else if (SDL_PointInRect(&p, &saveBtn)) saveProject(workspaceBlocks, "assets/project.txt");
                 else if (SDL_PointInRect(&p, &loadBtn)) loadProject(workspaceBlocks, "assets/project.txt");
