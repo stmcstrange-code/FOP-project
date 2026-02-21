@@ -2,7 +2,6 @@
 #ifndef FOP_PROJECT_BLOCK_H
 #define FOP_PROJECT_BLOCK_H
 
-
 #include <vector>
 #include <string>
 #include <SDL2/SDL.h>

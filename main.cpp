@@ -10,7 +10,6 @@
 #include "FileHandler.h"
 #include <SDL2/SDL2_gfx.h>
 #include <SDL2/SDL_mixer.h>
-
 #include "Sound.h"
 
 // Categories
