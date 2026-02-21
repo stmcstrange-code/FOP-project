@@ -11,11 +11,11 @@
 #include <SDL2/SDL2_gfx.h>
 #include <SDL2/SDL_mixer.h>
 #include "Sound.h"
+#include <SDL2/SDL_image.h>
+#include "file_dialog.h"
 
-// Categories
 enum Category { MOTION, LOOKS, SOUND, EVENTS, CONTROL, SENSING, OPERATORS, VARIABLES, MY_BLOCKS };
 
-// which category a block belongs to
 Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE) return LOOKS;
@@ -53,9 +53,11 @@ int main(int argc, char* argv[]) {
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
     TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 14);
 
+    IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
+
+
     Category currentCategory = MOTION;
 
-    // Sidebar Templates
     std::vector<VisualBlock> sidebarTemplates = {
         {{MOVE, 40, 0}, {95, 60, 120, 40}, {76, 151, 255, 255}, "MOVE "},
         {{TURN, 15, 0}, {95, 110, 120, 40}, {76, 151, 255, 255}, "TURN "},
@@ -87,7 +89,8 @@ int main(int argc, char* argv[]) {
     std::vector<VisualBlock> workspaceBlocks;
     VisualBlock *activeDragBlock = nullptr, *editingBlock = nullptr;
     int dragOffsetX = 0, dragOffsetY = 0;
-    Sprite cat; cat.loadBMP(ren, "assets/cat.bmp");
+    Sprite cat;
+    cat.loadBMP(ren, "assets/cat.bmp");
     ProgramManager manager;
     bool isRunning = false, quit = false, draggingCat = false;
     int currentStep = 0;
@@ -128,6 +131,20 @@ int main(int argc, char* argv[]) {
                 }
                 else if (SDL_PointInRect(&p, &saveBtn)) saveProject(workspaceBlocks, "assets/project.txt");
                 else if (SDL_PointInRect(&p, &loadBtn)) loadProject(workspaceBlocks, "assets/project.txt");
+
+                SDL_Rect userImage = {930, 650, 50, 30};
+
+                if (SDL_PointInRect(&p, &userImage)) {
+                    char* path = openSpriteDialog();
+
+                    if (path != nullptr) {
+                        SDL_Surface* img = IMG_Load(path);
+                        if (img) {
+                            cat.texture = SDL_CreateTextureFromSurface(ren, img);
+                            SDL_FreeSurface(img);
+                        }
+                    }
+                }
 
                 SDL_Rect catR = {(int)cat.x-30, (int)cat.y-30, 60, 60};
                 if (SDL_PointInRect(&p, &catR)) { draggingCat = true; dragOffsetX = p.x - (int)cat.x; dragOffsetY = p.y - (int)cat.y; }
@@ -185,7 +202,8 @@ int main(int argc, char* argv[]) {
 
         SDL_SetRenderDrawColor(ren, 240, 240, 240, 255); SDL_RenderClear(ren);
 
-        SDL_Rect toolbar = {0,0,80,768}, blocksArea = {80,0,150,768}, stage = {800,0,224,768};
+        SDL_Rect toolbar = {0,0,80,768}, blocksArea = {80,0,150,768},
+        stage = {800,0,224,768};
         SDL_SetRenderDrawColor(ren, 255,255,255,255); SDL_RenderFillRect(ren, &toolbar);
         SDL_SetRenderDrawColor(ren, 225,225,225,255); SDL_RenderFillRect(ren, &blocksArea);
         SDL_SetRenderDrawColor(ren, 245,245,245,255); SDL_RenderFillRect(ren, &stage);
@@ -216,13 +234,23 @@ int main(int argc, char* argv[]) {
             renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
         }
 
-        SDL_Rect runBtnRect = {95, 600, 120, 35}, saveBtnRect = {95, 645, 120, 35}, loadBtnRect = {95, 690, 120, 35};
-        SDL_SetRenderDrawColor(ren, 50, 200, 50, 255); SDL_RenderFillRect(ren, &runBtnRect);
+        SDL_Rect runBtnRect = {95, 600, 120, 35},
+        saveBtnRect = {95, 645, 120, 35},
+        loadBtnRect = {95, 690, 120, 35};
+        SDL_SetRenderDrawColor(ren, 50, 200, 50, 255);
+        SDL_RenderFillRect(ren, &runBtnRect);
         renderText(ren, font, "GO / RUN", 155, 610, {255, 255, 255, 255}, true);
-        SDL_SetRenderDrawColor(ren, 100, 100, 100, 255); SDL_RenderFillRect(ren, &saveBtnRect);
+        SDL_SetRenderDrawColor(ren, 100, 100, 100, 255);
+        SDL_RenderFillRect(ren, &saveBtnRect);
         renderText(ren, font, "SAVE", 155, 655, {255, 255, 255, 255}, true);
         SDL_RenderFillRect(ren, &loadBtnRect);
         renderText(ren, font, "LOAD", 155, 700, {255, 255, 255, 255}, true);
+
+        SDL_Rect userImage = {880, 650, 100, 30};
+        SDL_SetRenderDrawColor(ren, 0, 150, 240, 255);
+        SDL_RenderFillRect(ren, &userImage);
+        renderText(ren, font, "load image", 930, 655, {255, 255, 255, 255}, true);
+
 
         cat.draw(ren);
         SDL_RenderPresent(ren);

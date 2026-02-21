@@ -14,8 +14,10 @@ add_executable(FOP-project
         Sprite.h
         Sound.h
         Sound.cpp
+        file.dialog.cpp
+        file_dialog.h
 )
 
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/assets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
-target_link_libraries(${PROJECT_NAME} -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer)
+target_link_libraries(${PROJECT_NAME} -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer comdlg32)
