@@ -11,21 +11,32 @@ void addBlock(ProgramManager& pm, BlockType t, float v) {
     pm.script.push_back({t, v, 0});
 }
 
-
 void preprocessScript(ProgramManager& pm) {
     std::vector<int> stack;
     for (int i = 0; i < (int)pm.script.size(); i++) {
-        if (pm.script[i].type == REPEAT) {
-            stack.push_back(i); // Remember where the loop started
+        if (pm.script[i].type == REPEAT || pm.script[i].type == IF) {
+            stack.push_back(i);
         }
-        else if (pm.script[i].type == END_LOOP) {
+        else if (pm.script[i].type == ELSE) {
+            if (!stack.empty() && pm.script[stack.back()].type == IF) {
+                int ifIdx = stack.back();
+                pm.script[ifIdx].jumpTo = i;
+                stack.pop_back();
+                stack.push_back(i);
+            }
+        }
+        else if (pm.script[i].type == END_LOOP || pm.script[i].type == END_IF) {
             if (!stack.empty()) {
                 int startIdx = stack.back();
                 stack.pop_back();
 
 
-                pm.script[startIdx].jumpTo = i;
-                pm.script[i].jumpTo = startIdx;
+                if (pm.script[i].type == END_IF && pm.script[startIdx].type == IF) {
+                    pm.script[startIdx].jumpTo = i;
+                } else {
+                    pm.script[startIdx].jumpTo = i;
+                    pm.script[i].jumpTo = startIdx;
+                }
             }
         }
     }
@@ -54,6 +65,19 @@ void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& ss, int& currentSte
         case PEN_DOWN: s.penDown = true; break;
         case PEN_UP:   s.penDown = false; break;
         case ERASE:    s.clearTrail(); break;
+        case IF:
+            if (!(pm.variables.vars["my variable"] > b.value)) {
+                currentStep = b.jumpTo + 1; // Jump to ELSE or END_IF
+                jumped = true;
+            }
+            break;
+        case ELSE:
+            currentStep = b.jumpTo + 1;
+            jumped = true;
+            break;
+
+        case END_IF:
+            break;
         case REPEAT:
             if (b.iterations >= b.value) {
                 b.iterations = 0;

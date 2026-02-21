@@ -19,7 +19,8 @@ enum Category { MOTION, LOOKS, SOUND, EVENTS, CONTROL, SENSING, OPERATORS, VARIA
 Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE) return LOOKS;
-    if (type == REPEAT || type == END_LOOP || type == WAIT) return CONTROL;
+    if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF)
+        return CONTROL;
     if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
     if (type == PLAY_SOUND || type == SET_VOLUME ||type == SET_PITCH ) return SOUND;
     return MOTION;
@@ -74,6 +75,9 @@ int main(int argc, char* argv[]) {
         {{PLAY_SOUND, 0 ,0}, {95, 60, 120, 40} ,{207, 99, 207, 255}, "PLAY SOUND"},
         {{SET_VOLUME, 50 ,0}, {95, 110, 120, 40} ,{207, 99, 207, 255}, "SET VOLUME"},
         {{SET_PITCH, 1.0f ,0}, {95, 160, 120, 40} ,{207, 99, 207, 255}, "SET PITCH"},
+        {{IF, 10, 0}, {95, 210, 120, 40}, {255, 171, 25, 255}, "IF VAR > "},
+        {{ELSE, 0, 0}, {95, 260, 120, 40}, {255, 171, 25, 255}, "ELSE"},
+        {{END_IF, 0, 0}, {95, 310, 120, 40}, {255, 171, 25, 255}, "END IF"},
     };
 
     struct CategoryUI {
@@ -130,8 +134,10 @@ int main(int argc, char* argv[]) {
                     std::sort(workspaceBlocks.begin(), workspaceBlocks.end(), [](const VisualBlock& a, const VisualBlock& b) { return a.rect.y < b.rect.y; });
                     for (auto& vb : workspaceBlocks) manager.script.push_back(vb.data);
                     preprocessScript(manager);
+
                     isRunning = true;
                     currentStep = 0;
+
                 }
                 else if (SDL_PointInRect(&p, &saveBtn)) saveProject(workspaceBlocks, "assets/project.txt");
                 else if (SDL_PointInRect(&p, &loadBtn)) loadProject(workspaceBlocks, "assets/project.txt");
@@ -163,12 +169,24 @@ int main(int argc, char* argv[]) {
                 if (!activeDragBlock && !draggingCat) {
                     for (int i = (int)workspaceBlocks.size() - 1; i >= 0; i--) {
                         if (SDL_PointInRect(&p, &workspaceBlocks[i].rect)) {
+
                             if (p.x > workspaceBlocks[i].rect.x + 80) {
-                                editingBlock = &workspaceBlocks[i]; editingBlock->isEditing = true;
-                                editingBlock->editBuffer = ""; SDL_StartTextInput();
-                            } else {
-                                activeDragBlock = &workspaceBlocks[i]; activeDragBlock->isDragging = true;
-                                dragOffsetX = p.x - activeDragBlock->rect.x; dragOffsetY = p.y - activeDragBlock->rect.y;
+                                BlockType type = workspaceBlocks[i].data.type;
+
+                                if (type == MOVE || type == TURN || type == WAIT || type == REPEAT ||
+                                    type == SET_VAR || type == CHANGE_VAR || type == IF) {
+
+                                    editingBlock = &workspaceBlocks[i];
+                                    editingBlock->isEditing = true;
+                                    editingBlock->editBuffer = "";
+                                    SDL_StartTextInput();
+                                    }
+                            }
+                             else {
+                                activeDragBlock = &workspaceBlocks[i];
+                                activeDragBlock->isDragging = true;
+                                dragOffsetX = p.x - activeDragBlock->rect.x;
+                                dragOffsetY = p.y - activeDragBlock->rect.y;
                             }
                             break;
                         }
@@ -243,7 +261,7 @@ int main(int argc, char* argv[]) {
         for (auto& b : sidebarTemplates) {
             if (getCategory(b.data.type) == currentCategory) {
                 SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
-                bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR);
+                bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR || b.data.type == IF);
                 std::string lbl = b.label + (hasNum ? std::to_string((int)b.data.value) : "");
                 renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
@@ -252,7 +270,7 @@ int main(int argc, char* argv[]) {
         for (auto& b : workspaceBlocks) {
             SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
             std::string t = b.label;
-            bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR);
+            bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR  || b.data.type == IF);
             if (hasNum) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
             renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
         }

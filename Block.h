@@ -24,15 +24,18 @@ enum BlockType {
     CHANGE_VAR,
     PLAY_SOUND,
     SET_VOLUME,
-    SET_PITCH
+    SET_PITCH,
+    IF,
+    ELSE,
+    END_IF
 };
 
 
 struct Block {
     BlockType type;
     float value;
-    int iterations = 0;
-    int jumpTo = -1;
+    int iterations = 0; // Used for REPEAT logic
+    int jumpTo = -1;    // NEW: Index of the partner block (e.g., REPEAT knows where END is)
     std::string soundName;
 };
 
