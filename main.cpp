@@ -58,6 +58,8 @@ int main(int argc, char* argv[]) {
 
     Category currentCategory = MOTION;
 
+    SDL_Rect workSpace = {230,0,420,768};
+
     std::vector<VisualBlock> sidebarTemplates = {
         {{MOVE, 40, 0}, {95, 60, 120, 40}, {76, 151, 255, 255}, "MOVE "},
         {{TURN, 15, 0}, {95, 110, 120, 40}, {76, 151, 255, 255}, "TURN "},
@@ -173,26 +175,43 @@ int main(int argc, char* argv[]) {
             }
 
             if (e.type == SDL_MOUSEMOTION) {
-                if (activeDragBlock) { activeDragBlock->rect.x = e.motion.x - dragOffsetX; activeDragBlock->rect.y = e.motion.y - dragOffsetY; }
-                if (draggingCat) { cat.x = (float)(e.motion.x - dragOffsetX); cat.y = (float)(e.motion.y - dragOffsetY); }
+                if (activeDragBlock) {
+                    activeDragBlock->rect.x = e.motion.x - dragOffsetX;
+                    activeDragBlock->rect.y = e.motion.y - dragOffsetY;
+                }
+                if (draggingCat) {
+                    cat.x = (float)(e.motion.x - dragOffsetX); cat.y = (float)(e.motion.y - dragOffsetY);
+                }
             }
 
             if (e.type == SDL_MOUSEBUTTONUP) {
                 if (activeDragBlock) {
-                    if (activeDragBlock->rect.x < 230) {
+                    bool completelyOutside =
+                     activeDragBlock->rect.x + activeDragBlock->rect.w < workSpace.x ||
+                        activeDragBlock->rect.x > workSpace.x + workSpace.w ||
+                        activeDragBlock->rect.y + activeDragBlock->rect.h < workSpace.y ||
+                        activeDragBlock->rect.y > workSpace.y + workSpace.h;
+
+                    if (completelyOutside) {
                         for (auto it = workspaceBlocks.begin(); it != workspaceBlocks.end(); ++it) {
-                            if (&(*it) == activeDragBlock) { workspaceBlocks.erase(it); break; }
+                            if (&(*it) == activeDragBlock) {
+                                workspaceBlocks.erase(it); break;
+                            }
                         }
-                    } else {
+                    }
+                    else {
                         for (auto& other : workspaceBlocks) {
                             if (&other == activeDragBlock) continue;
                             if (abs(activeDragBlock->rect.x - other.rect.x) < 30 && abs(activeDragBlock->rect.y - (other.rect.y + 40)) < 25) {
-                                activeDragBlock->rect.x = other.rect.x; activeDragBlock->rect.y = other.rect.y + 40; break;
+                                activeDragBlock->rect.x = other.rect.x;
+                                activeDragBlock->rect.y = other.rect.y + 40;
+                                break;
                             }
                         }
                     }
                 }
-                activeDragBlock = nullptr; draggingCat = false;
+                activeDragBlock = nullptr;
+                draggingCat = false;
             }
         }
 
@@ -202,11 +221,13 @@ int main(int argc, char* argv[]) {
 
         SDL_SetRenderDrawColor(ren, 240, 240, 240, 255); SDL_RenderClear(ren);
 
-        SDL_Rect toolbar = {0,0,80,768}, blocksArea = {80,0,150,768},
-        stage = {800,0,224,768};
+        SDL_Rect toolbar = {0,0,80,768},
+        blocksArea = {80,0,150,768},
+        stage = {650,0,374,768};
         SDL_SetRenderDrawColor(ren, 255,255,255,255); SDL_RenderFillRect(ren, &toolbar);
         SDL_SetRenderDrawColor(ren, 225,225,225,255); SDL_RenderFillRect(ren, &blocksArea);
         SDL_SetRenderDrawColor(ren, 245,245,245,255); SDL_RenderFillRect(ren, &stage);
+        SDL_SetRenderDrawColor(ren, 255,255,255,255); SDL_RenderFillRect(ren, &workSpace);
 
 
 
