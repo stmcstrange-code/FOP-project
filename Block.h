@@ -28,7 +28,8 @@ enum BlockType {
     IF,
     ELSE,
     END_IF,
-    TOUCHING_EDGE
+    TOUCHING_EDGE,
+    GOTO_RANDOM
 };
 
 
