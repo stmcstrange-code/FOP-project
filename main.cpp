@@ -129,8 +129,8 @@ int main(int argc, char* argv[]) {
                     if (e.key.keysym.sym == SDLK_RETURN) {
                         try {
                             float val = std::stof(paneBuffer);
-                            if (activeField == FIELD_X) cat.x = val;
-                            else if (activeField == FIELD_Y) cat.y = val;
+                            if (activeField == FIELD_X) cat.x = val + 837;
+                            else if (activeField == FIELD_Y) cat.y = 225 - val;
                             else if (activeField == FIELD_SIZE) cat.size = val;
                             else if (activeField == FIELD_DIR) cat.angle = val;
                         } catch (...) {}
@@ -277,10 +277,11 @@ int main(int argc, char* argv[]) {
         SDL_RenderDrawRect(ren, &xBox); SDL_RenderDrawRect(ren, &yBox); SDL_RenderDrawRect(ren, &sBox); SDL_RenderDrawRect(ren, &dBox);
         SDL_RenderDrawRect(ren, &showBtn); SDL_RenderDrawRect(ren, &hideBtn);
 
+
+        renderText(ren, font, (activeField == FIELD_X ? paneBuffer + "|" : std::to_string((int)cat.x - 837)), 695, 475, {0,0,0,255});
+        renderText(ren, font, (activeField == FIELD_Y ? paneBuffer + "|" : std::to_string(225 - (int)cat.y)), 770, 475, {0,0,0,255});
         renderText(ren, font, "x", 675, 475, {150, 150, 150, 255});
-        renderText(ren, font, (activeField == FIELD_X ? paneBuffer + "|" : std::to_string((int)cat.x)), 695, 475, {0,0,0,255});
         renderText(ren, font, "y", 750, 475, {150, 150, 150, 255});
-        renderText(ren, font, (activeField == FIELD_Y ? paneBuffer + "|" : std::to_string((int)cat.y)), 770, 475, {0,0,0,255});
         renderText(ren, font, "Size", 820, 475, {150, 150, 150, 255});
         renderText(ren, font, (activeField == FIELD_SIZE ? paneBuffer + "|" : std::to_string((int)cat.size)), 860, 475, {0,0,0,255});
         renderText(ren, font, "Dir", 925, 475, {150, 150, 150, 255});

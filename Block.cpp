@@ -126,11 +126,14 @@ void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& ss, int& currentSte
             break;
         case SET_PITCH: setPitch(ss, b.soundName, b.value);
             break;
-        case GOTO_RANDOM: {
-            s.x = 650 + (rand() % (1024 - 650 - 50));
-            s.y = 50 + (rand() % (450 - 100));
-            break;
-        }
+     case GOTO_RANDOM: {
+    //Scratch-style coordinates
+    int randomX = (rand() % 374) - 187;
+    int randomY = (rand() % 450) - 225;
+    s.x = 837 + randomX;
+    s.y = 225 - randomY;
+    break;
+}
 
     }
     if (!jumped) currentStep++;
