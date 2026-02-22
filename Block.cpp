@@ -129,13 +129,18 @@ void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& ss, int& currentSte
             break;
         case SET_PITCH: setPitch(ss, b.soundName, b.value);
             break;
-     case GOTO_RANDOM: {
+        case GOTO_RANDOM: {
     //Scratch-style coordinates
     int randomX = (rand() % 374) - 187;
     int randomY = (rand() % 450) - 225;
     s.x = 837 + randomX;
     s.y = 225 - randomY;
     break;
+        case SET_X: {
+            // If input is 0, screen x becomes 837
+            s.x = 837 + b.value;
+            break;
+        }
 }
 
     }

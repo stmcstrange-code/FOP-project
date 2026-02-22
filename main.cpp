@@ -18,7 +18,7 @@ enum Category { MOTION, LOOKS, SOUND, EVENTS, CONTROL, SENSING, OPERATORS, VARIA
 enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 
 Category getCategory(BlockType type) {
-    if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X) return MOTION;
+    if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE) return LOOKS;
     if (type == TOUCHING_EDGE) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF)
@@ -95,6 +95,7 @@ int main(int argc, char* argv[]) {
         {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"},
         {{GOTO_RANDOM, 0, 0}, {95, 160, 120, 40}, {76, 151, 255, 255}, "GO RANDOM"},
         {{CHANGE_X, 10, 0}, {95, 210, 120, 40}, {76, 151, 255, 255}, "change x by "},
+        {{SET_X, 0, 0}, {95, 260, 120, 40}, {76, 151, 255, 255}, "set x to "}
     };
 
     struct CategoryUI { std::string name; SDL_Color color; };
@@ -306,7 +307,10 @@ int main(int argc, char* argv[]) {
         for (auto& b : sidebarTemplates) {
             if (getCategory(b.data.type) == currentCategory) {
                 SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
-                bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR || b.data.type == IF || b.data.type == CHANGE_X);
+                bool hasNum = (b.data.type == MOVE || b.data.type == TURN
+                    || b.data.type == WAIT || b.data.type == REPEAT
+                    || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
+                    || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X);
                 std::string lbl = b.label + (hasNum && b.data.type != TOUCHING_EDGE ? std::to_string((int)b.data.value) : "");
                 renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
@@ -314,7 +318,10 @@ int main(int argc, char* argv[]) {
         for (auto& b : workspaceBlocks) {
             SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
             std::string t = b.label;
-            bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR || b.data.type == IF || b.data.type == CHANGE_X);
+            bool hasNum = (b.data.type == MOVE || b.data.type == TURN
+                || b.data.type == WAIT || b.data.type == REPEAT
+                || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
+                || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X);
             if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
             renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
         }
