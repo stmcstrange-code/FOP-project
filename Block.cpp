@@ -45,7 +45,7 @@ void preprocessScript(ProgramManager& pm) {
     }
 }
 
-void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& ss, int& currentStep) {
+void executeNext(ProgramManager& pm, Sprite& s, Sound& meow, int& currentStep) {
     if (currentStep >= (int)pm.script.size()) return;
 
     Block& b = pm.script[currentStep];
@@ -122,12 +122,11 @@ void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& ss, int& currentSte
             break;
         }
 
-        // case PLAY_SOUND: Mix_PlayChannel(-1, gSound,0);
-        case PLAY_SOUND: playSound(ss, b.soundName);
+        case PLAY_SOUND: playSound(meow);
             break;
-        case SET_VOLUME: setVolume(ss, b.soundName , (int)b.value );
+        case SET_VOLUME: setVolume(meow, b.value);
             break;
-        case SET_PITCH: setPitch(ss, b.soundName, b.value);
+        case SET_PITCH: setPitch(meow,  b.value);
             break;
         case GOTO_RANDOM: {
     //Scratch-style coordinates

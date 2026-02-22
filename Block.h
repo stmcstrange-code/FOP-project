@@ -3,11 +3,8 @@
 #define FOP_PROJECT_BLOCK_H
 
 #include <vector>
-#include <string>
 #include <SDL2/SDL.h>
 #include <map>
-#pragma once
-#include <string>
 #include "Sound.h"
 
 
@@ -69,7 +66,7 @@ struct Sprite;
 
 
 void addBlock(ProgramManager& pm, BlockType t, float v);
-void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& soundSystem, int& currentStep);
+void executeNext(ProgramManager& pm, Sprite& s, Sound& sound, int& currentStep);
 void preprocessScript(ProgramManager& pm);
 
 

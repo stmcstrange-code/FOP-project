@@ -40,14 +40,19 @@ void renderText(SDL_Renderer* ren, TTF_Font* font, std::string text, int x, int 
     SDL_DestroyTexture(tex);
 }
 
-Mix_Chunk* gSound = nullptr;
+Sound meow;
 
 int main(int argc, char* argv[]) {
-    SDL_Init(SDL_INIT_VIDEO);
-    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
-    SoundSystem soundSystem;
-    gSound = Mix_LoadWAV("assets/sound.wav");
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
     TTF_Init();
+
+    if ( Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT,2,2048) <0) {
+        std::cerr << "Error opening audio mixer" << std::endl;
+        Mix_GetError();
+        return -1;
+    }
+    loadSound(meow ,"assets/sound.wav" );
+
 
     SDL_Window* win = SDL_CreateWindow("Scratch", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, 0);
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
@@ -256,7 +261,7 @@ int main(int argc, char* argv[]) {
         }
 
         if (isRunning && currentStep < (int)manager.script.size()) {
-            executeNext(manager, cat, soundSystem, currentStep);
+            executeNext(manager, cat, meow, currentStep);
             cat.checkBoundaries(1024, 450, 650);
             SDL_Delay(100);
         } else isRunning = false;
@@ -310,7 +315,7 @@ int main(int argc, char* argv[]) {
                 bool hasNum = (b.data.type == MOVE || b.data.type == TURN
                     || b.data.type == WAIT || b.data.type == REPEAT
                     || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
-                    || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X);
+                    || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X|| b.data.type == SET_VOLUME|| b.data.type == SET_PITCH);
                 std::string lbl = b.label + (hasNum && b.data.type != TOUCHING_EDGE ? std::to_string((int)b.data.value) : "");
                 renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
@@ -321,7 +326,7 @@ int main(int argc, char* argv[]) {
             bool hasNum = (b.data.type == MOVE || b.data.type == TURN
                 || b.data.type == WAIT || b.data.type == REPEAT
                 || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
-                || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X);
+                || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X|| b.data.type == SET_VOLUME|| b.data.type == SET_PITCH);
             if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
             renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
         }
@@ -343,5 +348,10 @@ int main(int argc, char* argv[]) {
         SDL_RenderPresent(ren);
     }
     if (font) TTF_CloseFont(font);
-    TTF_Quit(); SDL_Quit(); return 0;
+    TTF_Quit();
+
+    Mix_FreeChunk(meow.chunk);
+    Mix_CloseAudio();
+    SDL_Quit();
+     return 0;
 }

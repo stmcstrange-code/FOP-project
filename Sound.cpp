@@ -1,123 +1,71 @@
 #include "Sound.h"
-
 #include <cmath>
 #include <iostream>
+#include <vector>
 
-bool loadSound (SoundSystem& ss , const std::string& name , const std::string& path) {
-Mix_Chunk *chunk = Mix_LoadWAV(path.c_str());
-    if (!chunk) {
+void loadSound (Sound& sound , const char* path) {
+
+    sound.chunk = Mix_LoadWAV(path);
+    if (!sound.chunk) {
         std::cout << "Error loading sound: " << path << std::endl;
-        return false;
+        Mix_GetError();
     }
-    Sound s;
-    s.name = name;
-    s.chunk = chunk;
-    s.volume = MIX_MAX_VOLUME;
 
-    ss.sounds.push_back(s);
-    return true;
+    sound.volume = MIX_MAX_VOLUME;
+    sound.pitch = 1.0f;
 }
 
-Sound* findSound( SoundSystem& ss , const std::string& name ) {
-    for (auto& s : ss.sounds) {
-        if (s.name == name) {
-            return &s;
+void playSound(Sound& sound) {
+    sound.channel = Mix_PlayChannel(-1, sound.chunk, 0);
+}
+
+void stopSound(Sound& sound) {
+    Mix_HaltChannel(sound.channel);
+}
+
+void setVolume(Sound& sound, int volume) {
+    if (volume<0) volume=0;
+    if (volume>128) volume=128;
+
+    sound.volume = volume;
+    Mix_VolumeChunk(sound.chunk,volume);
+}
+
+void setPitch(Sound& sound, float pitch) {
+    if (!sound.chunk) return;
+    if (sound.channel != -1) Mix_HaltChannel(sound.channel);
+
+    int sampleSize = 2;
+    int channels = 2;
+
+    Uint16* samples = (Uint16*)sound.chunk->abuf;
+    int lenSamples = sound.chunk->alen / (sampleSize * channels);
+
+    int newLenSamples = static_cast<int>(lenSamples / pitch);
+    std::vector<Uint16> newBuffer(newLenSamples * channels);
+
+    // linear interpolation
+    for (int i = 0; i < newLenSamples; i++) {
+        float srcPos = i * pitch;
+        int idx = (int)srcPos;
+        float frac = srcPos - idx;
+
+        if (idx + 1 < lenSamples) {
+            for (int c = 0; c < channels; c++) {
+                int s0 = samples[idx * channels + c];
+                int s1 = samples[(idx + 1) * channels + c];
+                newBuffer[i * channels + c] = static_cast<Uint16>(s0 + (s1 - s0) * frac);
+            }
+        } else {
+            for (int c = 0; c < channels; c++)
+                newBuffer[i * channels + c] = samples[idx * channels + c];
         }
     }
-return nullptr;
+
+    Mix_Chunk tempChunk = *sound.chunk;
+    tempChunk.abuf = (Uint8*)newBuffer.data();
+    tempChunk.alen = newLenSamples * channels * sampleSize;
+
+    sound.channel = Mix_PlayChannel(-1, &tempChunk, 0);
+    Mix_VolumeChunk(&tempChunk, sound.volume);
 }
-
-void setPitch( SoundSystem& ss , const std::string& name, float pitch) {
-
-    Sound* s = findSound(ss, name);
-    if (!s) return;
-
-    s->pitch = pitch;
-}
-
-Mix_Chunk* pitchChunk(Mix_Chunk* original,float pitch ) {
-if (!original || pitch<=0.0f) return nullptr;
-
-    Uint32 newLength = static_cast<Uint32> (original-> alen/pitch);
-    Uint8* newBuffer = new Uint8[newLength];
-
-    for ( Uint32 i = 0; i < newLength; i++) {
-        Uint32 srcIndex = static_cast<Uint32> (i* pitch);
-        if (srcIndex < original->alen) {
-            newBuffer[i]= original->abuf[srcIndex];
-        }
-        else {newBuffer[i]=0;}
-    }
-    Mix_Chunk* newChunk = Mix_QuickLoad_RAW(newBuffer , newLength);
-    return newChunk;
-}
-
-    void playSound(SoundSystem& ss, const std::string& name) {
-   Sound* s = findSound(ss, name);
-    if (!s) return;
-
-    Mix_VolumeChunk(s->chunk, s->volume);
-
-    if (std::fabs(s->pitch - 1.0f)< 0.01f) {
-        Mix_PlayChannel(-1, s->chunk, 0);
-    }
-    else {
-        Mix_Chunk* pitched = pitchChunk(s->chunk, s->pitch);
-        Mix_PlayChannel(-1, pitched, 0);
-    }
-}
-
-void setVolume(SoundSystem& ss, const std::string& name, int volume) {
-    Sound* s = findSound(ss, name);
-    if (!s) return;
-
-    s->volume = volume;
-}
-
-
-
-// void initAudio(AudioSystem* system) {
-//     system-> soundCount=0;
-//     SDL_AudioSpec want;
-//     want.freq = 44100;
-//     want.format = AUDIO_S16SYS;
-//     want.channels = 2;
-//     want.samples = 1024;
-//     want.callback = NULL;
-//
-//     system->device = SDL_OpenAudioDevice(NULL,0,&want,NULL,0);
-// }
-//
-// void closeAudio(AudioSystem *system) {
-//     for (int i=0; i < system->soundCount; i++) {
-//         SDL_FreeWAV (system-> sounds[i].buffer);
-//     }
-//     SDL_CloseAudioDevice(system->device);
-// }
-//
-// int addSound(AudioSystem* system , const char* name, const char* path) {
-//     if (system-> soundCount >= 50) return -1;
-//
-//     Sound* s= &system-> sounds[system-> soundCount];
-//     strcpy (s->name, name);
-//
-//     if (SDL_LoadWAV(path , &s->spec , &s->buffer , &s->length) == NULL) return -1;
-//
-//     system-> soundCount++;
-//     return system-> soundCount - 1;
-// }
-//
-// Sound* getSound (AudioSystem* system, const char* name ) {
-//     for (int i=0; i < system->soundCount; i++) {
-//         if (strcmp(system-> sounds[i].name , name) ==0) { return &system-> sounds[i];}
-//     }
-//     return NULL;
-// }
-//
-//
-// //
-// // void setPitch(AudioSystem* system,Sound* sound, float volume ,float pitch) {
-// //     if (!sound) return;
-// //
-// //     if (pitch> 0.1f && pitch < 4.0f) {sound-> pitch = pitch;}
-// // }
