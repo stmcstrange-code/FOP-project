@@ -117,7 +117,10 @@ void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& ss, int& currentSte
             }
             break;
 
-
+       case CHANGE_X: {
+            s.x += b.value;
+            break;
+        }
 
         // case PLAY_SOUND: Mix_PlayChannel(-1, gSound,0);
         case PLAY_SOUND: playSound(ss, b.soundName);

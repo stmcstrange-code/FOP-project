@@ -18,7 +18,7 @@ enum Category { MOTION, LOOKS, SOUND, EVENTS, CONTROL, SENSING, OPERATORS, VARIA
 enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 
 Category getCategory(BlockType type) {
-    if (type == MOVE || type == TURN || type == GOTO_RANDOM) return MOTION;
+    if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE) return LOOKS;
     if (type == TOUCHING_EDGE) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF)
@@ -93,7 +93,8 @@ int main(int argc, char* argv[]) {
         {{ELSE, 0, 0}, {95, 260, 120, 40}, {255, 171, 25, 255}, "ELSE"},
         {{END_IF, 0, 0}, {95, 310, 120, 40}, {255, 171, 25, 255}, "END IF"},
         {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"},
-        {{GOTO_RANDOM, 0, 0}, {95, 160, 120, 40}, {76, 151, 255, 255}, "GO RANDOM"}
+        {{GOTO_RANDOM, 0, 0}, {95, 160, 120, 40}, {76, 151, 255, 255}, "GO RANDOM"},
+        {{CHANGE_X, 10, 0}, {95, 210, 120, 40}, {76, 151, 255, 255}, "change x by "},
     };
 
     struct CategoryUI { std::string name; SDL_Color color; };
@@ -213,10 +214,16 @@ int main(int argc, char* argv[]) {
                     for (int i = (int)workspaceBlocks.size() - 1; i >= 0; i--) {
                         if (SDL_PointInRect(&p, &workspaceBlocks[i].rect)) {
                             if (p.x > workspaceBlocks[i].rect.x + 80) {
-                                editingBlock = &workspaceBlocks[i]; editingBlock->isEditing = true; editingBlock->editBuffer = ""; SDL_StartTextInput();
-                            } else {
-                                activeDragBlock = &workspaceBlocks[i]; activeDragBlock->isDragging = true;
-                                dragOffsetX = p.x - activeDragBlock->rect.x; dragOffsetY = p.y - activeDragBlock->rect.y;
+                                editingBlock = &workspaceBlocks[i];
+                                editingBlock->isEditing = true;
+                                editingBlock->editBuffer = "";
+                                SDL_StartTextInput();
+                            }
+                            else {
+                                activeDragBlock = &workspaceBlocks[i];
+                                activeDragBlock->isDragging = true;
+                                dragOffsetX = p.x - activeDragBlock->rect.x;
+                                dragOffsetY = p.y - activeDragBlock->rect.y;
                             }
                             break;
                         }
@@ -276,8 +283,7 @@ int main(int argc, char* argv[]) {
         SDL_SetRenderDrawColor(ren, 220, 220, 220, 255);
         SDL_RenderDrawRect(ren, &xBox); SDL_RenderDrawRect(ren, &yBox); SDL_RenderDrawRect(ren, &sBox); SDL_RenderDrawRect(ren, &dBox);
         SDL_RenderDrawRect(ren, &showBtn); SDL_RenderDrawRect(ren, &hideBtn);
-
-
+        // Change these lines to subtract the center offset
         renderText(ren, font, (activeField == FIELD_X ? paneBuffer + "|" : std::to_string((int)cat.x - 837)), 695, 475, {0,0,0,255});
         renderText(ren, font, (activeField == FIELD_Y ? paneBuffer + "|" : std::to_string(225 - (int)cat.y)), 770, 475, {0,0,0,255});
         renderText(ren, font, "x", 675, 475, {150, 150, 150, 255});
@@ -300,7 +306,7 @@ int main(int argc, char* argv[]) {
         for (auto& b : sidebarTemplates) {
             if (getCategory(b.data.type) == currentCategory) {
                 SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
-                bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR || b.data.type == IF);
+                bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR || b.data.type == IF || b.data.type == CHANGE_X);
                 std::string lbl = b.label + (hasNum && b.data.type != TOUCHING_EDGE ? std::to_string((int)b.data.value) : "");
                 renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
@@ -308,7 +314,7 @@ int main(int argc, char* argv[]) {
         for (auto& b : workspaceBlocks) {
             SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
             std::string t = b.label;
-            bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR || b.data.type == IF);
+            bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR || b.data.type == IF || b.data.type == CHANGE_X);
             if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
             renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
         }
