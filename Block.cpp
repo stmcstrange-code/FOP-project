@@ -14,6 +14,9 @@ void addBlock(ProgramManager& pm, BlockType t, float v) {
 void preprocessScript(ProgramManager& pm) {
     std::vector<int> stack;
     for (int i = 0; i < (int)pm.script.size(); i++) {
+        if (pm.script[i].type == IF) {
+            printf("Pairing IF at step %d to END_IF/ELSE at step %d\n", i, pm.script[i].jumpTo);
+        }
         if (pm.script[i].type == REPEAT || pm.script[i].type == IF) {
             stack.push_back(i);
         }
@@ -51,11 +54,6 @@ void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& ss, int& currentSte
     switch (b.type) {
         case MOVE: {
             s.move(b.value);
-            //Boundary Check
-            if (s.x < 230) s.x = 230; // Sidebar limit
-            if (s.x > 800) s.x = 800; // Stage limit
-            if (s.y < 0) s.y = 0;
-            if (s.y > 768) s.y = 768;
             break;
         }
         case TURN:     s.rotate(b.value); break;
@@ -65,12 +63,30 @@ void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& ss, int& currentSte
         case PEN_DOWN: s.penDown = true; break;
         case PEN_UP:   s.penDown = false; break;
         case ERASE:    s.clearTrail(); break;
-        case IF:
-            if (!(pm.variables.vars["my variable"] > b.value)) {
-                currentStep = b.jumpTo + 1; // Jump to ELSE or END_IF
+        case IF: {
+            bool conditionMet = false;
+
+            if (b.value == 999) { // Touching Edge Sensing
+                // Sidebar area: 0-230 | Stage: 230-1024
+                bool touchingLeft   = (s.x <= 280);
+                bool touchingRight  = (s.x >= 970);
+                bool touchingTop    = (s.y <= 50);
+                bool touchingBottom = (s.y >= 710);
+
+                if (touchingLeft || touchingRight || touchingTop || touchingBottom) {
+                    conditionMet = true;
+                }
+            } else {
+                conditionMet = (pm.variables.vars["my variable"] > b.value);
+            }
+
+            if (!conditionMet) {
+                currentStep = b.jumpTo + 1;
                 jumped = true;
             }
             break;
+        }
+
         case ELSE:
             currentStep = b.jumpTo + 1;
             jumped = true;
@@ -115,6 +131,7 @@ void executeNext(ProgramManager& pm, Sprite& s, SoundSystem& ss, int& currentSte
     if (!jumped) currentStep++;
 
     //Infinite Loop Watchdog
+
     static int instructionsThisFrame = 0;
     instructionsThisFrame++;
     if (instructionsThisFrame > 500) {

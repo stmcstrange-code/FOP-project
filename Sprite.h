@@ -13,17 +13,19 @@ struct Sprite{
     float x = 400.0f, y = 300.0f;
     float angle = 0.0f;
     bool penDown = false;
+    float size = 100.0f;
+    bool visible = true;
     std::vector<Point> trail;
     SDL_Texture* texture = nullptr;
     int w = 50, h = 50;
-
+    Sprite();
     void draw(SDL_Renderer* ren);
     void move(float steps);
     void rotate(float deg);
     void clearPen();
     void clearTrail();
 
-    void checkBoundaries(int screenW, int screenH, int sidebarW);
+    void checkBoundaries(int screenW, int screenH, int stageLeft);
 
     bool loadBMP(SDL_Renderer* ren, const std::string& path);
 
