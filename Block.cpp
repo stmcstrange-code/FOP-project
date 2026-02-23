@@ -133,6 +133,14 @@ void executeNext(ProgramManager& pm, Sprite& s, Sound& meow, int& currentStep) {
     break;
 
         }
+         case CHANGE_Y: {
+    s.y -= b.value;
+    break;
+                }
+         case SET_Y: {
+    s.y = 225 - b.value;
+    break;
+                 }
             case SET_X: {
             // If input is 0, screen x becomes 837
             s.x = 837 + b.value;

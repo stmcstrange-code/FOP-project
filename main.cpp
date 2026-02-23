@@ -18,7 +18,7 @@ enum Category { MOTION, LOOKS, SOUND, EVENTS, CONTROL, SENSING, OPERATORS, VARIA
 enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 
 Category getCategory(BlockType type) {
-    if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X) return MOTION;
+    if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE) return LOOKS;
     if (type == TOUCHING_EDGE) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF)
@@ -100,7 +100,9 @@ int main(int argc, char* argv[]) {
         {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"},
         {{GOTO_RANDOM, 0, 0}, {95, 160, 120, 40}, {76, 151, 255, 255}, "GO RANDOM"},
         {{CHANGE_X, 10, 0}, {95, 210, 120, 40}, {76, 151, 255, 255}, "change x by "},
-        {{SET_X, 0, 0}, {95, 260, 120, 40}, {76, 151, 255, 255}, "set x to "}
+        {{SET_X, 0, 0}, {95, 260, 120, 40}, {76, 151, 255, 255}, "set x to "},
+        {{CHANGE_Y, 10, 0}, {95, 310, 120, 40}, {76, 151, 255, 255}, "change y by "},
+        {{SET_Y, 0, 0}, {95, 360, 120, 40}, {76, 151, 255, 255}, "set y to "}
     };
 
     struct CategoryUI { std::string name; SDL_Color color; };
@@ -289,7 +291,6 @@ int main(int argc, char* argv[]) {
         SDL_SetRenderDrawColor(ren, 220, 220, 220, 255);
         SDL_RenderDrawRect(ren, &xBox); SDL_RenderDrawRect(ren, &yBox); SDL_RenderDrawRect(ren, &sBox); SDL_RenderDrawRect(ren, &dBox);
         SDL_RenderDrawRect(ren, &showBtn); SDL_RenderDrawRect(ren, &hideBtn);
-        // Change these lines to subtract the center offset
         renderText(ren, font, (activeField == FIELD_X ? paneBuffer + "|" : std::to_string((int)cat.x - 837)), 695, 475, {0,0,0,255});
         renderText(ren, font, (activeField == FIELD_Y ? paneBuffer + "|" : std::to_string(225 - (int)cat.y)), 770, 475, {0,0,0,255});
         renderText(ren, font, "x", 675, 475, {150, 150, 150, 255});
@@ -315,7 +316,8 @@ int main(int argc, char* argv[]) {
                 bool hasNum = (b.data.type == MOVE || b.data.type == TURN
                     || b.data.type == WAIT || b.data.type == REPEAT
                     || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
-                    || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X|| b.data.type == SET_VOLUME|| b.data.type == SET_PITCH);
+                    || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_Y || b.data.type == CHANGE_Y
+                    || b.data.type == SET_X|| b.data.type == SET_VOLUME|| b.data.type == SET_PITCH);
                 std::string lbl = b.label + (hasNum && b.data.type != TOUCHING_EDGE ? std::to_string((int)b.data.value) : "");
                 renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
@@ -326,7 +328,9 @@ int main(int argc, char* argv[]) {
             bool hasNum = (b.data.type == MOVE || b.data.type == TURN
                 || b.data.type == WAIT || b.data.type == REPEAT
                 || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
-                || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X|| b.data.type == SET_VOLUME|| b.data.type == SET_PITCH);
+                || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X
+                || b.data.type == SET_Y || b.data.type == CHANGE_Y
+                || b.data.type == SET_VOLUME|| b.data.type == SET_PITCH);
             if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
             renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
         }

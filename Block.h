@@ -28,7 +28,9 @@ enum BlockType {
     TOUCHING_EDGE,
     GOTO_RANDOM,
     CHANGE_X,
-    SET_X
+    SET_X,
+    CHANGE_Y,
+    SET_Y
 };
 
 
