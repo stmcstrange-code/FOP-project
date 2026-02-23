@@ -1,10 +1,6 @@
 #include "Block.h"
 #include "Sprite.h"
-#include <SDL2/SDL_mixer.h>
 #include "Sound.h"
-
-
-extern Mix_Chunk* gSound;
 
 
 void addBlock(ProgramManager& pm, BlockType t, float v) {
@@ -135,11 +131,12 @@ void executeNext(ProgramManager& pm, Sprite& s, Sound& meow, int& currentStep) {
     s.x = 837 + randomX;
     s.y = 225 - randomY;
     break;
-        case SET_X: {
+
+        }
+            case SET_X: {
             // If input is 0, screen x becomes 837
             s.x = 837 + b.value;
             break;
-        }
 }
 
     }

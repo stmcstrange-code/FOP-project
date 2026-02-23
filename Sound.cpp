@@ -1,5 +1,4 @@
 #include "Sound.h"
-#include <cmath>
 #include <iostream>
 #include <vector>
 
@@ -33,18 +32,22 @@ void setVolume(Sound& sound, int volume) {
 
 void setPitch(Sound& sound, float pitch) {
     if (!sound.chunk) return;
+
+    if ( pitch<=0.05f) pitch = 0.05f;
+    if (pitch> 5.0f) pitch = 5.0f;
+
     if (sound.channel != -1) Mix_HaltChannel(sound.channel);
 
     int sampleSize = 2;
     int channels = 2;
 
-    Uint16* samples = (Uint16*)sound.chunk->abuf;
+    Sint16* samples = (Sint16*)sound.chunk->abuf;
     int lenSamples = sound.chunk->alen / (sampleSize * channels);
 
     int newLenSamples = static_cast<int>(lenSamples / pitch);
-    std::vector<Uint16> newBuffer(newLenSamples * channels);
 
-    // linear interpolation
+    std::vector<Sint16> newBuffer(newLenSamples * channels);
+
     for (int i = 0; i < newLenSamples; i++) {
         float srcPos = i * pitch;
         int idx = (int)srcPos;
@@ -54,7 +57,7 @@ void setPitch(Sound& sound, float pitch) {
             for (int c = 0; c < channels; c++) {
                 int s0 = samples[idx * channels + c];
                 int s1 = samples[(idx + 1) * channels + c];
-                newBuffer[i * channels + c] = static_cast<Uint16>(s0 + (s1 - s0) * frac);
+                newBuffer[i * channels + c] = static_cast<Sint16>(s0 + (s1 - s0) * frac);
             }
         } else {
             for (int c = 0; c < channels; c++)
