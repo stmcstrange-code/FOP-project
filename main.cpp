@@ -18,7 +18,7 @@ enum Category { MOTION, LOOKS, SOUND, EVENTS, CONTROL, SENSING, OPERATORS, VARIA
 enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 
 Category getCategory(BlockType type) {
-    if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y) return MOTION;
+    if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y || type == BOUNCE) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE) return LOOKS;
     if (type == TOUCHING_EDGE) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF)
@@ -102,7 +102,8 @@ int main(int argc, char* argv[]) {
         {{CHANGE_X, 10, 0}, {95, 210, 120, 40}, {76, 151, 255, 255}, "change x by "},
         {{SET_X, 0, 0}, {95, 260, 120, 40}, {76, 151, 255, 255}, "set x to "},
         {{CHANGE_Y, 10, 0}, {95, 310, 120, 40}, {76, 151, 255, 255}, "change y by "},
-        {{SET_Y, 0, 0}, {95, 360, 120, 40}, {76, 151, 255, 255}, "set y to "}
+        {{SET_Y, 0, 0}, {95, 360, 120, 40}, {76, 151, 255, 255}, "set y to "},
+        {{BOUNCE, 0, 0}, {95, 410, 120, 40}, {76, 151, 255, 255}, "if on edge, bounce"}
     };
 
     struct CategoryUI { std::string name; SDL_Color color; };
@@ -264,7 +265,7 @@ int main(int argc, char* argv[]) {
 
         if (isRunning && currentStep < (int)manager.script.size()) {
             executeNext(manager, cat, meow, currentStep);
-            cat.checkBoundaries(1024, 450, 650);
+            //cat.checkBoundaries(1024, 450, 650);
             SDL_Delay(100);
         } else isRunning = false;
 
