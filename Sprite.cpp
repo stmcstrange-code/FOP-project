@@ -81,7 +81,7 @@ void Sprite::checkBoundaries(int screenW, int screenH, int sidebarW) {
 }
 
 void Sprite::draw(SDL_Renderer* ren) {
-
+    if (!isVisible) return;
     SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
     for (size_t i = 0; i + 1 < trail.size(); i += 2) {
         SDL_RenderDrawLine(ren, (int)trail[i].x, (int)trail[i].y, (int)trail[i+1].x, (int)trail[i+1].y);

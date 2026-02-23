@@ -24,12 +24,9 @@ struct Sprite{
     void rotate(float deg);
     void clearPen();
     void clearTrail();
-
+    bool isVisible = true;
     void checkBoundaries(int screenW, int screenH, int stageLeft);
-
     bool loadBMP(SDL_Renderer* ren, const std::string& path);
-
-
     bool isClicked(int mx, int my) {
         int dW = (w > 100) ? 60 : w;
         int dH = (h > 100) ? 60 : h;

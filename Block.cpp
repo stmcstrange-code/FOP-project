@@ -184,7 +184,15 @@ case BOUNCE: {
             // If input is 0, screen x becomes 837
             s.x = 837 + b.value;
             break;
-}
+                    }
+           case SHOW: {
+    s.isVisible = true;
+    break;
+                    }
+           case HIDE: {
+    s.isVisible = false;
+    break;
+                    }
 
     }
     if (!jumped) currentStep++;

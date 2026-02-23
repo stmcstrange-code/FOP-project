@@ -19,7 +19,7 @@ enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 
 Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y || type == BOUNCE) return MOTION;
-    if (type == PEN_DOWN || type == PEN_UP || type == ERASE || type == CHANGE_SIZE || type == SET_SIZE) return LOOKS;
+    if (type == PEN_DOWN || type == PEN_UP || type == ERASE || type == CHANGE_SIZE ||type == SET_SIZE || type == SHOW || type ==HIDE)  return LOOKS;
     if (type == TOUCHING_EDGE) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF)
         return CONTROL;
@@ -97,6 +97,8 @@ int main(int argc, char* argv[]) {
     {{PEN_DOWN, 0, 0}, {95, 160, 120, 40}, {64, 184, 158, 255}, "PEN DOWN"},
     {{PEN_UP, 0, 0}, {95, 210, 120, 40}, {64, 184, 158, 255}, "PEN UP"},
     {{ERASE, 0, 0}, {95, 260, 120, 40}, {255, 102, 102, 255}, "ERASE"},
+    {{SHOW, 0, 0}, {95, 310, 120, 40}, {153, 102, 255, 255}, "SHOW"},
+    {{HIDE, 0, 0}, {95, 360, 120, 40}, {153, 102, 255, 255}, "HIDE"},
 
     // --- CONTROL (Orange) ---
     {{WAIT, 1, 0}, {95, 60, 120, 40}, {255, 171, 25, 255}, "WAIT "},
