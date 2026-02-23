@@ -62,7 +62,7 @@ void executeNext(ProgramManager& pm, Sprite& s, Sound& meow, int& currentStep) {
         case IF: {
             bool conditionMet = false;
 
-            if (b.value == 999) { // Touching Edge Sensing
+            if (b.value == 999) {
                 // Sidebar area: 0-230 | Stage: 230-1024
                 bool touchingLeft   = (s.x <= 280);
                 bool touchingRight  = (s.x >= 970);
@@ -202,12 +202,26 @@ case BOUNCE: {
             }
             break;
         }
+        case OP_ADD:
+            pm.variables.vars["my variable"] = b.value + b.value2;
+            break;
+        case OP_SUB:
+            pm.variables.vars["my variable"] = b.value - b.value2;
+            break;
+        case OP_MUL:
+            pm.variables.vars["my variable"] = b.value * b.value2;
+            break;
+        case OP_DIV:
+            if (b.value2 != 0)
+                pm.variables.vars["my variable"] = b.value / b.value2;
+            else
+                pm.variables.vars["my variable"] = 0;
+            break;
 
     }
     if (!jumped) currentStep++;
 
     //Infinite Loop Watchdog
-
     static int instructionsThisFrame = 0;
     instructionsThisFrame++;
     if (instructionsThisFrame > 500) {

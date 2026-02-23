@@ -36,13 +36,15 @@ enum BlockType {
     SET_SIZE,
     SHOW,
     HIDE,
-    GOTO_MOUSE
+    GOTO_MOUSE,
+    OP_ADD, OP_SUB, OP_MUL, OP_DIV
 };
 
 
 struct Block {
     BlockType type;
     float value;
+    float value2;
     int iterations = 0;
     int jumpTo = -1;
     std::string soundName;
@@ -54,9 +56,11 @@ struct VisualBlock {
     SDL_Rect rect;
     SDL_Color color;
     std::string label;
-    bool isDragging = false;
     bool isEditing = false;
+    bool isDragging = false;
+    bool isEditingValue2 = false;
     std::string editBuffer;
+    std::string editBuffer2;
 };
 
 

@@ -25,6 +25,7 @@ Category getCategory(BlockType type) {
         return CONTROL;
     if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
     if (type == PLAY_SOUND || type == SET_VOLUME || type == SET_PITCH) return SOUND;
+    if (type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV) return OPERATORS;
     return MOTION;
 }
 
@@ -48,11 +49,9 @@ int main(int argc, char* argv[]) {
 
     if ( Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT,2,2048) <0) {
         std::cerr << "Error opening audio mixer" << std::endl;
-        Mix_GetError();
         return -1;
     }
     loadSound(meow ,"assets/sound.wav" );
-
 
     SDL_Window* win = SDL_CreateWindow("Scratch", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, 0);
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
@@ -64,64 +63,60 @@ int main(int argc, char* argv[]) {
     std::string paneBuffer = "";
     SDL_Texture* backgroundTexture = nullptr;
 
-    // Layout Rects
     SDL_Rect sidebarArea   = {0, 0, 230, 768};
     SDL_Rect workSpace     = {230, 0, 420, 768};
     SDL_Rect stageArea     = {650, 0, 374, 450};
     SDL_Rect spritePane    = {650, 450, 374, 318};
 
-    // Sprite Pane Input Boxes
     SDL_Rect xBox = {690, 470, 45, 25};
     SDL_Rect yBox = {765, 470, 45, 25};
     SDL_Rect sBox = {855, 470, 45, 25};
     SDL_Rect dBox = {955, 470, 45, 25};
 
-    // Show/Hide Buttons
     SDL_Rect showBtn = {710, 510, 35, 25};
     SDL_Rect hideBtn = {750, 510, 35, 25};
 
-  std::vector<VisualBlock> sidebarTemplates = {
-    // --- MOTION (Blue) ---
-    {{MOVE, 40, 0}, {95, 60, 120, 40}, {76, 151, 255, 255}, "MOVE "},
-    {{TURN, 15, 0}, {95, 110, 120, 40}, {76, 151, 255, 255}, "TURN "},
-    {{GOTO_RANDOM, 0, 0}, {95, 160, 120, 40}, {76, 151, 255, 255}, "GO RANDOM"},
-    {{CHANGE_X, 10, 0}, {95, 210, 120, 40}, {76, 151, 255, 255}, "change x by "},
-    {{SET_X, 0, 0}, {95, 260, 120, 40}, {76, 151, 255, 255}, "set x to "},
-    {{CHANGE_Y, 10, 0}, {95, 310, 120, 40}, {76, 151, 255, 255}, "change y by "},
-    {{SET_Y, 0, 0}, {95, 360, 120, 40}, {76, 151, 255, 255}, "set y to "},
-    {{BOUNCE, 0, 0}, {95, 410, 120, 40}, {76, 151, 255, 255}, "if on edge,bounce"},
-
-    // --- LOOKS (Purple) ---
-    {{CHANGE_SIZE, 10, 0}, {95, 60, 120, 40}, {153, 102, 255, 255}, "change size by "},
-    {{SET_SIZE, 100, 0}, {95, 110, 120, 40}, {153, 102, 255, 255}, "set size to "},
-    {{PEN_DOWN, 0, 0}, {95, 160, 120, 40}, {64, 184, 158, 255}, "PEN DOWN"},
-    {{PEN_UP, 0, 0}, {95, 210, 120, 40}, {64, 184, 158, 255}, "PEN UP"},
-    {{ERASE, 0, 0}, {95, 260, 120, 40}, {255, 102, 102, 255}, "ERASE"},
-    {{SHOW, 0, 0}, {95, 310, 120, 40}, {153, 102, 255, 255}, "SHOW"},
-    {{HIDE, 0, 0}, {95, 360, 120, 40}, {153, 102, 255, 255}, "HIDE"},
-
-    // --- CONTROL (Orange) ---
-    {{WAIT, 1, 0}, {95, 60, 120, 40}, {255, 171, 25, 255}, "WAIT "},
-    {{REPEAT, 4, 0}, {95, 110, 120, 40}, {255, 171, 25, 255}, "REPEAT "},
-    {{END_LOOP, 0, 0}, {95, 160, 120, 40}, {255, 171, 25, 255}, "END LOOP"},
-    {{IF, 10, 0}, {95, 210, 120, 40}, {255, 171, 25, 255}, "IF VAR > "},
-    {{ELSE, 0, 0}, {95, 260, 120, 40}, {255, 171, 25, 255}, "ELSE"},
-    {{END_IF, 0, 0}, {95, 310, 120, 40}, {255, 171, 25, 255}, "END IF"},
-
-    // --- VARIABLES (Dark Orange) ---
-    {{SET_VAR, 0, 0}, {95, 60, 120, 40}, {255, 140, 26, 255}, "SET TO "},
-    {{CHANGE_VAR, 1, 0}, {95, 110, 120, 40}, {255, 140, 26, 255}, "CHANGE BY "},
-
-    // --- SOUND (Pink) ---
-    {{PLAY_SOUND, 0, 0}, {95, 60, 120, 40}, {207, 99, 207, 255}, "PLAY SOUND"},
-    {{SET_VOLUME, 50, 0}, {95, 110, 120, 40}, {207, 99, 207, 255}, "SET VOLUME"},
-    {{SET_PITCH, 1.0f, 0}, {95, 160, 120, 40}, {207, 99, 207, 255}, "SET PITCH"},
-
-    // --- SENSING (Light Blue) ---
-    {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"},
-    {{GOTO_MOUSE, 0, 0}, {95, 110, 120, 40}, {92, 177, 214, 255}, "go to mouse"}
-};
-
+    std::vector<VisualBlock> sidebarTemplates = {
+              //MOTION
+        {{MOVE, 40, 0}, {95, 60, 120, 40}, {76, 151, 255, 255}, "MOVE "},
+        {{TURN, 15, 0}, {95, 110, 120, 40}, {76, 151, 255, 255}, "TURN "},
+        {{GOTO_RANDOM, 0, 0}, {95, 160, 120, 40}, {76, 151, 255, 255}, "GO RANDOM"},
+        {{CHANGE_X, 10, 0}, {95, 210, 120, 40}, {76, 151, 255, 255}, "change x by "},
+        {{SET_X, 0, 0}, {95, 260, 120, 40}, {76, 151, 255, 255}, "set x to "},
+        {{CHANGE_Y, 10, 0}, {95, 310, 120, 40}, {76, 151, 255, 255}, "change y by "},
+        {{SET_Y, 0, 0}, {95, 360, 120, 40}, {76, 151, 255, 255}, "set y to "},
+        {{BOUNCE, 0, 0}, {95, 410, 120, 40}, {76, 151, 255, 255}, "if on edge,bounce"},
+             //LOOKS
+        {{CHANGE_SIZE, 10, 0}, {95, 60, 120, 40}, {153, 102, 255, 255}, "change size by "},
+        {{SET_SIZE, 100, 0}, {95, 110, 120, 40}, {153, 102, 255, 255}, "set size to "},
+        {{PEN_DOWN, 0, 0}, {95, 160, 120, 40}, {64, 184, 158, 255}, "PEN DOWN"},
+        {{PEN_UP, 0, 0}, {95, 210, 120, 40}, {64, 184, 158, 255}, "PEN UP"},
+        {{ERASE, 0, 0}, {95, 260, 120, 40}, {255, 102, 102, 255}, "ERASE"},
+        {{SHOW, 0, 0}, {95, 310, 120, 40}, {153, 102, 255, 255}, "SHOW"},
+        {{HIDE, 0, 0}, {95, 360, 120, 40}, {153, 102, 255, 255}, "HIDE"},
+            //CONTROL
+        {{WAIT, 1, 0}, {95, 60, 120, 40}, {255, 171, 25, 255}, "WAIT "},
+        {{REPEAT, 4, 0}, {95, 110, 120, 40}, {255, 171, 25, 255}, "REPEAT "},
+        {{END_LOOP, 0, 0}, {95, 160, 120, 40}, {255, 171, 25, 255}, "END LOOP"},
+        {{IF, 10, 0}, {95, 210, 120, 40}, {255, 171, 25, 255}, "IF VAR > "},
+        {{ELSE, 0, 0}, {95, 260, 120, 40}, {255, 171, 25, 255}, "ELSE"},
+        {{END_IF, 0, 0}, {95, 310, 120, 40}, {255, 171, 25, 255}, "END IF"},
+           //VARIABLES
+        {{SET_VAR, 0, 0}, {95, 60, 120, 40}, {255, 140, 26, 255}, "SET TO "},
+        {{CHANGE_VAR, 1, 0}, {95, 110, 120, 40}, {255, 140, 26, 255}, "CHANGE BY "},
+           //SOUND
+        {{PLAY_SOUND, 0, 0}, {95, 60, 120, 40}, {207, 99, 207, 255}, "PLAY SOUND"},
+        {{SET_VOLUME, 50, 0}, {95, 110, 120, 40}, {207, 99, 207, 255}, "SET VOLUME"},
+        {{SET_PITCH, 1.0f, 0}, {95, 160, 120, 40}, {207, 99, 207, 255}, "SET PITCH"},
+          //SENSING
+        {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"},
+        {{GOTO_MOUSE, 0, 0}, {95, 110, 120, 40}, {92, 177, 214, 255}, "go to mouse"},
+          //OPERATORS
+        {{OP_ADD, 0, 0}, {95, 60, 120, 40}, {92, 184, 92, 255}, "+"},
+        {{OP_SUB, 0, 0}, {95, 110, 120, 40}, {92, 184, 92, 255}, "-"},
+        {{OP_MUL, 0, 0}, {95, 160, 120, 40}, {92, 184, 92, 255}, "*"},
+        {{OP_DIV, 0, 0}, {95, 210, 120, 40}, {92, 184, 92, 255}, "/"}
+    };
     struct CategoryUI { std::string name; SDL_Color color; };
     std::vector<CategoryUI> catUIs = {
         {"Motion", {60, 131, 253, 255}}, {"Looks", {153, 102, 255, 255}},
@@ -167,12 +162,24 @@ int main(int argc, char* argv[]) {
 
             if (editingBlock) {
                 if (e.type == SDL_TEXTINPUT) {
-                    if (isdigit(e.text.text[0]) || e.text.text[0] == '.') editingBlock->editBuffer += e.text.text;
+                    if (isdigit(e.text.text[0]) || e.text.text[0] == '.' || e.text.text[0] == '-') {
+                        if (editingBlock->isEditingValue2) editingBlock->editBuffer2 += e.text.text;
+                        else editingBlock->editBuffer += e.text.text;
+                    }
                 } else if (e.type == SDL_KEYDOWN) {
-                    if (e.key.keysym.sym == SDLK_BACKSPACE && !editingBlock->editBuffer.empty()) editingBlock->editBuffer.pop_back();
+                    if (e.key.keysym.sym == SDLK_BACKSPACE) {
+                        if (editingBlock->isEditingValue2 && !editingBlock->editBuffer2.empty()) editingBlock->editBuffer2.pop_back();
+                        else if (!editingBlock->isEditingValue2 && !editingBlock->editBuffer.empty()) editingBlock->editBuffer.pop_back();
+                    }
                     if (e.key.keysym.sym == SDLK_RETURN) {
-                        if (!editingBlock->editBuffer.empty()) editingBlock->data.value = std::stof(editingBlock->editBuffer);
-                        editingBlock->isEditing = false; editingBlock = nullptr; SDL_StopTextInput();
+                        if (editingBlock->isEditingValue2) {
+                            if (!editingBlock->editBuffer2.empty()) editingBlock->data.value2 = std::stof(editingBlock->editBuffer2);
+                            editingBlock->isEditingValue2 = false;
+                        } else {
+                            if (!editingBlock->editBuffer.empty()) editingBlock->data.value = std::stof(editingBlock->editBuffer);
+                            editingBlock->isEditing = false;
+                        }
+                        editingBlock = nullptr; SDL_StopTextInput();
                     }
                 }
             }
@@ -238,17 +245,37 @@ int main(int argc, char* argv[]) {
                 if (!activeDragBlock && !draggingCat) {
                     for (int i = (int)workspaceBlocks.size() - 1; i >= 0; i--) {
                         if (SDL_PointInRect(&p, &workspaceBlocks[i].rect)) {
-                            if (p.x > workspaceBlocks[i].rect.x + 80) {
-                                editingBlock = &workspaceBlocks[i];
-                                editingBlock->isEditing = true;
-                                editingBlock->editBuffer = "";
-                                SDL_StartTextInput();
-                            }
-                            else {
-                                activeDragBlock = &workspaceBlocks[i];
-                                activeDragBlock->isDragging = true;
-                                dragOffsetX = p.x - activeDragBlock->rect.x;
-                                dragOffsetY = p.y - activeDragBlock->rect.y;
+                            if (workspaceBlocks[i].data.type >= OP_ADD && workspaceBlocks[i].data.type <= OP_DIV) {
+                                if (p.x < workspaceBlocks[i].rect.x + 50) { // Clicked Left Hole
+                                    editingBlock = &workspaceBlocks[i];
+                                    editingBlock->isEditing = true;
+                                    editingBlock->isEditingValue2 = false;
+                                    editingBlock->editBuffer = "";
+                                    SDL_StartTextInput();
+                                } else if (p.x > workspaceBlocks[i].rect.x + 70) { // Clicked Right Hole
+                                    editingBlock = &workspaceBlocks[i];
+                                    editingBlock->isEditing = false;
+                                    editingBlock->isEditingValue2 = true;
+                                    editingBlock->editBuffer2 = "";
+                                    SDL_StartTextInput();
+                                } else { // Clicked Middle - Dragging
+                                    activeDragBlock = &workspaceBlocks[i];
+                                    activeDragBlock->isDragging = true;
+                                    dragOffsetX = p.x - activeDragBlock->rect.x;
+                                    dragOffsetY = p.y - activeDragBlock->rect.y;
+                                }
+                            } else { // Normal Block logic
+                                if (p.x > workspaceBlocks[i].rect.x + 80) {
+                                    editingBlock = &workspaceBlocks[i];
+                                    editingBlock->isEditing = true;
+                                    editingBlock->editBuffer = "";
+                                    SDL_StartTextInput();
+                                } else {
+                                    activeDragBlock = &workspaceBlocks[i];
+                                    activeDragBlock->isDragging = true;
+                                    dragOffsetX = p.x - activeDragBlock->rect.x;
+                                    dragOffsetY = p.y - activeDragBlock->rect.y;
+                                }
                             }
                             break;
                         }
@@ -281,26 +308,19 @@ int main(int argc, char* argv[]) {
 
         if (isRunning && currentStep < (int)manager.script.size()) {
             executeNext(manager, cat, meow, currentStep);
-            //cat.checkBoundaries(1024, 450, 650);
             SDL_Delay(100);
         } else isRunning = false;
 
         SDL_SetRenderDrawColor(ren, 240, 240, 240, 255); SDL_RenderClear(ren);
-
         SDL_SetRenderDrawColor(ren, 255, 255, 255, 255); SDL_RenderFillRect(ren, &sidebarArea);
         SDL_SetRenderDrawColor(ren, 235, 235, 235, 255); SDL_RenderFillRect(ren, &workSpace);
-
-        // Stage with Background logic
         SDL_SetRenderDrawColor(ren, 255, 255, 255, 255); SDL_RenderFillRect(ren, &stageArea);
         if (backgroundTexture) SDL_RenderCopy(ren, backgroundTexture, nullptr, &stageArea);
-
         SDL_SetRenderDrawColor(ren, 242, 243, 247, 255); SDL_RenderFillRect(ren, &spritePane);
-
         SDL_SetRenderDrawColor(ren, 200, 200, 200, 255);
         SDL_RenderDrawLine(ren, 230, 0, 230, 768); SDL_RenderDrawLine(ren, 650, 0, 650, 768);
         SDL_RenderDrawLine(ren, 650, 450, 1024, 450);
 
-        // Input Boxes Rendering
         SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
         SDL_RenderFillRect(ren, &xBox); SDL_RenderFillRect(ren, &yBox); SDL_RenderFillRect(ren, &sBox); SDL_RenderFillRect(ren, &dBox);
         SDL_RenderFillRect(ren, &showBtn); SDL_RenderFillRect(ren, &hideBtn);
@@ -327,54 +347,79 @@ int main(int argc, char* argv[]) {
             filledCircleRGBA(ren, cX, cY, 20, catUIs[i].color.r, catUIs[i].color.g, catUIs[i].color.b, 255);
             renderText(ren, font, catUIs[i].name, cX, cY + 22, {80, 80, 80, 255}, true);
         }
+
+        // Sidebar Templates
         for (auto& b : sidebarTemplates) {
             if (getCategory(b.data.type) == currentCategory) {
                 SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
-                bool hasNum = (b.data.type == MOVE || b.data.type == TURN
-                    || b.data.type == WAIT || b.data.type == REPEAT
-                    || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
-                    || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_Y || b.data.type == CHANGE_Y
-                    || b.data.type == SET_X|| b.data.type == SET_VOLUME|| b.data.type == SET_PITCH
-                    || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
-                std::string lbl = b.label + (hasNum && b.data.type != TOUCHING_EDGE ? std::to_string((int)b.data.value) : "");
-                renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
+                if (b.data.type >= OP_ADD && b.data.type <= OP_DIV) {
+                    SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
+                    SDL_Rect sq1 = { b.rect.x + 10, b.rect.y + 5, 40, 30 };
+                    SDL_Rect sq2 = { b.rect.x + 70, b.rect.y + 5, 40, 30 };
+                    SDL_RenderFillRect(ren, &sq1); SDL_RenderFillRect(ren, &sq2);
+                    renderText(ren, font, b.label, b.rect.x + 54, b.rect.y + 12, {255, 255, 255, 255});
+                } else {
+                    bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_Y || b.data.type == CHANGE_Y || b.data.type == SET_X|| b.data.type == SET_VOLUME|| b.data.type == SET_PITCH || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
+                    std::string lbl = b.label + (hasNum && b.data.type != TOUCHING_EDGE ? std::to_string((int)b.data.value) : "");
+                    renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
+                }
             }
         }
+
+        // Workspace Blocks
+        int mx, my;
+        SDL_GetMouseState(&mx, &my);
+        SDL_Point mouseP = {mx, my};
+
         for (auto& b : workspaceBlocks) {
             SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
-            std::string t = b.label;
-            bool hasNum = (b.data.type == MOVE || b.data.type == TURN
-                || b.data.type == WAIT || b.data.type == REPEAT
-                || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
-                || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X
-                || b.data.type == SET_Y || b.data.type == CHANGE_Y
-                || b.data.type == SET_VOLUME|| b.data.type == SET_PITCH
-                || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
-            if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
-            renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
+            if (b.data.type >= OP_ADD && b.data.type <= OP_DIV) {
+                SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
+                SDL_Rect sq1 = { b.rect.x + 10, b.rect.y + 5, 40, 30 };
+                SDL_Rect sq2 = { b.rect.x + 70, b.rect.y + 5, 40, 30 };
+                SDL_RenderFillRect(ren, &sq1); SDL_RenderFillRect(ren, &sq2);
+
+                std::string t1 = (editingBlock == &b && b.isEditing) ? b.editBuffer + "|" : std::to_string((int)b.data.value);
+                std::string t2 = (editingBlock == &b && b.isEditingValue2) ? b.editBuffer2 + "|" : std::to_string((int)b.data.value2);
+                renderText(ren, font, t1, sq1.x + 5, sq1.y + 5, {0, 0, 0, 255});
+                renderText(ren, font, t2, sq2.x + 5, sq2.y + 5, {0, 0, 0, 255});
+                renderText(ren, font, b.label, b.rect.x + 54, b.rect.y + 12, {255, 255, 255, 255});
+
+                // Hover Calculation Logic
+                SDL_Rect middleArea = { b.rect.x + 50, b.rect.y, 20, 40 };
+                if (SDL_PointInRect(&mouseP, &middleArea)) {
+                    float result = 0;
+                    if (b.data.type == OP_ADD) result = b.data.value + b.data.value2;
+                    else if (b.data.type == OP_SUB) result = b.data.value - b.data.value2;
+                    else if (b.data.type == OP_MUL) result = b.data.value * b.data.value2;
+                    else if (b.data.type == OP_DIV && b.data.value2 != 0) result = b.data.value / b.data.value2;
+
+                    SDL_Rect resRect = { b.rect.x + 40, b.rect.y + 45, 40, 25 };
+                    SDL_SetRenderDrawColor(ren, 100, 100, 100, 255); SDL_RenderFillRect(ren, &resRect);
+                    renderText(ren, font, std::to_string((int)result), resRect.x + 20, resRect.y + 5, {255, 255, 255, 255}, true);
+                }
+            } else {
+                std::string t = b.label;
+                bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X || b.data.type == SET_Y || b.data.type == CHANGE_Y || b.data.type == SET_VOLUME|| b.data.type == SET_PITCH || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
+                if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
+                renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
+            }
         }
 
         SDL_Rect runBtnRect = {95, 600, 120, 35}, saveBtnRect = {95, 645, 120, 35}, loadBtnRect = {95, 690, 120, 35};
         SDL_SetRenderDrawColor(ren, 50, 200, 50, 255); SDL_RenderFillRect(ren, &runBtnRect); renderText(ren, font, "GO / RUN", 155, 610, {255, 255, 255, 255}, true);
         SDL_SetRenderDrawColor(ren, 100, 100, 100, 255); SDL_RenderFillRect(ren, &saveBtnRect); renderText(ren, font, "SAVE", 155, 655, {255, 255, 255, 255}, true);
         SDL_RenderFillRect(ren, &loadBtnRect); renderText(ren, font, "LOAD", 155, 700, {255, 255, 255, 255}, true);
-
-        SDL_Rect loadBgBtn = {880, 660, 120, 35};
-        SDL_SetRenderDrawColor(ren, 255, 140, 26, 255); SDL_RenderFillRect(ren, &loadBgBtn);
-        renderText(ren, font, "LOAD BACKGRND", 940, 670, {255, 255, 255, 255}, true);
-
-        SDL_Rect loadImageBtn = {880, 700, 120, 35};
-        SDL_SetRenderDrawColor(ren, 0, 150, 240, 255); SDL_RenderFillRect(ren, &loadImageBtn);
-        renderText(ren, font, "LOAD COSTUME", 940, 710, {255, 255, 255, 255}, true);
+        SDL_Rect loadBgBtn = {880, 660, 120, 35}; SDL_SetRenderDrawColor(ren, 255, 140, 26, 255); SDL_RenderFillRect(ren, &loadBgBtn); renderText(ren, font, "LOAD BACKGRND", 940, 670, {255, 255, 255, 255}, true);
+        SDL_Rect loadImageBtn = {880, 700, 120, 35}; SDL_SetRenderDrawColor(ren, 0, 150, 240, 255); SDL_RenderFillRect(ren, &loadImageBtn); renderText(ren, font, "LOAD COSTUME", 940, 710, {255, 255, 255, 255}, true);
 
         if (cat.visible) cat.draw(ren);
         SDL_RenderPresent(ren);
     }
     if (font) TTF_CloseFont(font);
     TTF_Quit();
-
     Mix_FreeChunk(meow.chunk);
     Mix_CloseAudio();
     SDL_Quit();
-     return 0;
+    return 0;
 }
