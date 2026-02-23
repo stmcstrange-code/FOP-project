@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
         {{SET_X, 0, 0}, {95, 260, 120, 40}, {76, 151, 255, 255}, "set x to "},
         {{CHANGE_Y, 10, 0}, {95, 310, 120, 40}, {76, 151, 255, 255}, "change y by "},
         {{SET_Y, 0, 0}, {95, 360, 120, 40}, {76, 151, 255, 255}, "set y to "},
-        {{BOUNCE, 0, 0}, {95, 410, 120, 40}, {76, 151, 255, 255}, "if on edge, bounce"}
+        {{BOUNCE, 0, 0}, {95, 410, 120, 40}, {76, 151, 255, 255}, "if on edge,bounce"}
     };
 
     struct CategoryUI { std::string name; SDL_Color color; };
