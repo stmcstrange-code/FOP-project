@@ -19,7 +19,7 @@ enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 
 Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y || type == BOUNCE) return MOTION;
-    if (type == PEN_DOWN || type == PEN_UP || type == ERASE) return LOOKS;
+    if (type == PEN_DOWN || type == PEN_UP || type == ERASE || type == CHANGE_SIZE || type == SET_SIZE) return LOOKS;
     if (type == TOUCHING_EDGE) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF)
         return CONTROL;
@@ -80,31 +80,44 @@ int main(int argc, char* argv[]) {
     SDL_Rect showBtn = {710, 510, 35, 25};
     SDL_Rect hideBtn = {750, 510, 35, 25};
 
-    std::vector<VisualBlock> sidebarTemplates = {
-        {{MOVE, 40, 0}, {95, 60, 120, 40}, {76, 151, 255, 255}, "MOVE "},
-        {{TURN, 15, 0}, {95, 110, 120, 40}, {76, 151, 255, 255}, "TURN "},
-        {{PEN_DOWN, 0, 0}, {95, 60, 120, 40}, {64, 184, 158, 255}, "PEN DOWN"},
-        {{PEN_UP, 0, 0}, {95, 110, 120, 40}, {64, 184, 158, 255}, "PEN UP"},
-        {{ERASE, 0, 0}, {95, 160, 120, 40}, {255, 102, 102, 255}, "ERASE"},
-        {{WAIT, 1, 0}, {95, 60, 120, 40}, {255, 171, 25, 255}, "WAIT "},
-        {{REPEAT, 4, 0}, {95, 110, 120, 40}, {255, 171, 25, 255}, "REPEAT "},
-        {{END_LOOP, 0, 0}, {95, 160, 120, 40}, {255, 171, 25, 255}, "END LOOP"},
-        {{SET_VAR, 0, 0}, {95, 60, 120, 40}, {255, 140, 26, 255}, "SET TO "},
-        {{CHANGE_VAR, 1, 0}, {95, 110, 120, 40}, {255, 140, 26, 255}, "CHANGE BY "},
-        {{PLAY_SOUND, 0, 0}, {95, 60, 120, 40}, {207, 99, 207, 255}, "PLAY SOUND"},
-        {{SET_VOLUME, 50, 0}, {95, 110, 120, 40}, {207, 99, 207, 255}, "SET VOLUME"},
-        {{SET_PITCH, 1.0f, 0}, {95, 160, 120, 40}, {207, 99, 207, 255}, "SET PITCH"},
-        {{IF, 10, 0}, {95, 210, 120, 40}, {255, 171, 25, 255}, "IF VAR > "},
-        {{ELSE, 0, 0}, {95, 260, 120, 40}, {255, 171, 25, 255}, "ELSE"},
-        {{END_IF, 0, 0}, {95, 310, 120, 40}, {255, 171, 25, 255}, "END IF"},
-        {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"},
-        {{GOTO_RANDOM, 0, 0}, {95, 160, 120, 40}, {76, 151, 255, 255}, "GO RANDOM"},
-        {{CHANGE_X, 10, 0}, {95, 210, 120, 40}, {76, 151, 255, 255}, "change x by "},
-        {{SET_X, 0, 0}, {95, 260, 120, 40}, {76, 151, 255, 255}, "set x to "},
-        {{CHANGE_Y, 10, 0}, {95, 310, 120, 40}, {76, 151, 255, 255}, "change y by "},
-        {{SET_Y, 0, 0}, {95, 360, 120, 40}, {76, 151, 255, 255}, "set y to "},
-        {{BOUNCE, 0, 0}, {95, 410, 120, 40}, {76, 151, 255, 255}, "if on edge,bounce"}
-    };
+  std::vector<VisualBlock> sidebarTemplates = {
+    // --- MOTION (Blue) ---
+    {{MOVE, 40, 0}, {95, 60, 120, 40}, {76, 151, 255, 255}, "MOVE "},
+    {{TURN, 15, 0}, {95, 110, 120, 40}, {76, 151, 255, 255}, "TURN "},
+    {{GOTO_RANDOM, 0, 0}, {95, 160, 120, 40}, {76, 151, 255, 255}, "GO RANDOM"},
+    {{CHANGE_X, 10, 0}, {95, 210, 120, 40}, {76, 151, 255, 255}, "change x by "},
+    {{SET_X, 0, 0}, {95, 260, 120, 40}, {76, 151, 255, 255}, "set x to "},
+    {{CHANGE_Y, 10, 0}, {95, 310, 120, 40}, {76, 151, 255, 255}, "change y by "},
+    {{SET_Y, 0, 0}, {95, 360, 120, 40}, {76, 151, 255, 255}, "set y to "},
+    {{BOUNCE, 0, 0}, {95, 410, 120, 40}, {76, 151, 255, 255}, "if on edge,bounce"},
+
+    // --- LOOKS (Purple) ---
+    {{CHANGE_SIZE, 10, 0}, {95, 60, 120, 40}, {153, 102, 255, 255}, "change size by "},
+    {{SET_SIZE, 100, 0}, {95, 110, 120, 40}, {153, 102, 255, 255}, "set size to "},
+    {{PEN_DOWN, 0, 0}, {95, 160, 120, 40}, {64, 184, 158, 255}, "PEN DOWN"},
+    {{PEN_UP, 0, 0}, {95, 210, 120, 40}, {64, 184, 158, 255}, "PEN UP"},
+    {{ERASE, 0, 0}, {95, 260, 120, 40}, {255, 102, 102, 255}, "ERASE"},
+
+    // --- CONTROL (Orange) ---
+    {{WAIT, 1, 0}, {95, 60, 120, 40}, {255, 171, 25, 255}, "WAIT "},
+    {{REPEAT, 4, 0}, {95, 110, 120, 40}, {255, 171, 25, 255}, "REPEAT "},
+    {{END_LOOP, 0, 0}, {95, 160, 120, 40}, {255, 171, 25, 255}, "END LOOP"},
+    {{IF, 10, 0}, {95, 210, 120, 40}, {255, 171, 25, 255}, "IF VAR > "},
+    {{ELSE, 0, 0}, {95, 260, 120, 40}, {255, 171, 25, 255}, "ELSE"},
+    {{END_IF, 0, 0}, {95, 310, 120, 40}, {255, 171, 25, 255}, "END IF"},
+
+    // --- VARIABLES (Dark Orange) ---
+    {{SET_VAR, 0, 0}, {95, 60, 120, 40}, {255, 140, 26, 255}, "SET TO "},
+    {{CHANGE_VAR, 1, 0}, {95, 110, 120, 40}, {255, 140, 26, 255}, "CHANGE BY "},
+
+    // --- SOUND (Pink) ---
+    {{PLAY_SOUND, 0, 0}, {95, 60, 120, 40}, {207, 99, 207, 255}, "PLAY SOUND"},
+    {{SET_VOLUME, 50, 0}, {95, 110, 120, 40}, {207, 99, 207, 255}, "SET VOLUME"},
+    {{SET_PITCH, 1.0f, 0}, {95, 160, 120, 40}, {207, 99, 207, 255}, "SET PITCH"},
+
+    // --- SENSING (Light Blue) ---
+    {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"}
+};
 
     struct CategoryUI { std::string name; SDL_Color color; };
     std::vector<CategoryUI> catUIs = {
@@ -318,7 +331,8 @@ int main(int argc, char* argv[]) {
                     || b.data.type == WAIT || b.data.type == REPEAT
                     || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
                     || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_Y || b.data.type == CHANGE_Y
-                    || b.data.type == SET_X|| b.data.type == SET_VOLUME|| b.data.type == SET_PITCH);
+                    || b.data.type == SET_X|| b.data.type == SET_VOLUME|| b.data.type == SET_PITCH
+                    || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
                 std::string lbl = b.label + (hasNum && b.data.type != TOUCHING_EDGE ? std::to_string((int)b.data.value) : "");
                 renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
@@ -331,7 +345,8 @@ int main(int argc, char* argv[]) {
                 || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
                 || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X
                 || b.data.type == SET_Y || b.data.type == CHANGE_Y
-                || b.data.type == SET_VOLUME|| b.data.type == SET_PITCH);
+                || b.data.type == SET_VOLUME|| b.data.type == SET_PITCH
+                || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
             if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
             renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
         }

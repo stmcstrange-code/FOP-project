@@ -31,7 +31,9 @@ enum BlockType {
     SET_X,
     CHANGE_Y,
     SET_Y,
-    BOUNCE
+    BOUNCE,
+    CHANGE_SIZE,
+    SET_SIZE
 };
 
 

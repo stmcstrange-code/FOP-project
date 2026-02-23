@@ -117,6 +117,16 @@ void executeNext(ProgramManager& pm, Sprite& s, Sound& meow, int& currentStep) {
             s.x += b.value;
             break;
         }
+       case CHANGE_SIZE: {
+    s.size += b.value;
+    if (s.size < 5) s.size = 5;
+    break;
+}
+      case SET_SIZE: {
+    s.size = b.value;
+    if (s.size < 5) s.size = 5;
+    break;
+}
 
         case PLAY_SOUND: playSound(meow);
             break;
