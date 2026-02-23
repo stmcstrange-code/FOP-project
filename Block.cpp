@@ -193,6 +193,15 @@ case BOUNCE: {
     s.isVisible = false;
     break;
                     }
+        case GOTO_MOUSE: {
+            int mx, my;
+            SDL_GetMouseState(&mx, &my);
+            if (mx >= 650 && mx <= 1024 && my >= 0 && my <= 450) {
+                s.x = (float)mx - (s.size / 2.0f);
+                s.y = (float)my - (s.size / 2.0f);
+            }
+            break;
+        }
 
     }
     if (!jumped) currentStep++;

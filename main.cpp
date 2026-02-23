@@ -20,7 +20,7 @@ enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y || type == BOUNCE) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE || type == CHANGE_SIZE ||type == SET_SIZE || type == SHOW || type ==HIDE)  return LOOKS;
-    if (type == TOUCHING_EDGE) return SENSING;
+    if (type == TOUCHING_EDGE || type == GOTO_MOUSE) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF)
         return CONTROL;
     if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
@@ -118,7 +118,8 @@ int main(int argc, char* argv[]) {
     {{SET_PITCH, 1.0f, 0}, {95, 160, 120, 40}, {207, 99, 207, 255}, "SET PITCH"},
 
     // --- SENSING (Light Blue) ---
-    {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"}
+    {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"},
+    {{GOTO_MOUSE, 0, 0}, {95, 110, 120, 40}, {92, 177, 214, 255}, "go to mouse"}
 };
 
     struct CategoryUI { std::string name; SDL_Color color; };

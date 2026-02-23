@@ -35,7 +35,8 @@ enum BlockType {
     CHANGE_SIZE,
     SET_SIZE,
     SHOW,
-    HIDE
+    HIDE,
+    GOTO_MOUSE
 };
 
 
