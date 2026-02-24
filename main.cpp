@@ -20,7 +20,7 @@ enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y || type == BOUNCE) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE || type == CHANGE_SIZE ||type == SET_SIZE || type == SHOW || type ==HIDE)  return LOOKS;
-    if (type == TOUCHING_EDGE || type == GOTO_MOUSE) return SENSING;
+    if (type == TOUCHING_EDGE || type == GOTO_MOUSE || type == MOUSE_X) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF) return CONTROL;
     if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
     if (type == PLAY_SOUND || type == SET_VOLUME || type == SET_PITCH) return SOUND;
@@ -110,6 +110,7 @@ int main(int argc, char* argv[]) {
                      //---SENSING---
         {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"},
         {{GOTO_MOUSE, 0, 0}, {95, 110, 120, 40}, {92, 177, 214, 255}, "go to mouse"},
+        {{MOUSE_X, 0, 0}, {95, 160, 120, 40}, {92, 177, 214, 255}, "mouse x "},
                      //---OPERATORS---
         {{OP_ADD, 0, 0}, {95, 60, 120, 40}, {92, 184, 92, 255}, "+"},
         {{OP_SUB, 0, 0}, {95, 110, 120, 40}, {92, 184, 92, 255}, "-"},
@@ -351,16 +352,22 @@ int main(int argc, char* argv[]) {
                         || b.data.type == IF || b.data.type == CHANGE_X
                         || b.data.type == SET_Y || b.data.type == CHANGE_Y
                         || b.data.type == SET_X|| b.data.type == SET_VOLUME
-                        || b.data.type == SET_PITCH || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
+                        || b.data.type == SET_PITCH || b.data.type == SET_SIZE
+                        || b.data.type == CHANGE_SIZE || b.data.type == MOUSE_X);
                     std::string lbl = b.label + (hasNum && b.data.type != TOUCHING_EDGE ? std::to_string((int)b.data.value) : "");
                     renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
                 }
             }
         }
 
-        int mx, my; SDL_GetMouseState(&mx, &my); SDL_Point mouseP = {mx, my};
+        int mx, my;
+        SDL_GetMouseState(&mx, &my);
+        SDL_Point mouseP = {mx, my};
 
         for (auto& b : workspaceBlocks) {
+          if (b.data.type == MOUSE_X) {
+          b.data.value = (float)(mx - 837);
+        }
             SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
             if (b.data.type >= OP_ADD && b.data.type <= OP_EQU) {
                 SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
@@ -399,7 +406,8 @@ int main(int argc, char* argv[]) {
                     || b.data.type == IF || b.data.type == CHANGE_X
                     || b.data.type == SET_X || b.data.type == SET_Y
                     || b.data.type == CHANGE_Y || b.data.type == SET_VOLUME
-                    || b.data.type == SET_PITCH || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
+                    || b.data.type == SET_PITCH || b.data.type == SET_SIZE
+                    || b.data.type == CHANGE_SIZE || b.data.type == MOUSE_X);
                 if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
                 renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
