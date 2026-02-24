@@ -1,6 +1,7 @@
 #include "Block.h"
 #include "Sprite.h"
 #include "Sound.h"
+#include <iostream>
 
 
 void addBlock(ProgramManager& pm, BlockType t, float v) {
