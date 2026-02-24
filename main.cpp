@@ -42,6 +42,28 @@ void renderText(SDL_Renderer* ren, TTF_Font* font, std::string text, int x, int 
 
 Sound meow;
 
+bool bgMenuOpen = false;
+
+int bgBtnX = 980;
+int bgBtnY = 640;
+int bgBtnR = 18;
+
+SDL_Rect bgMenuRect = {880, 540, 200, 120};
+SDL_Rect menuLoadBg = {890, 585, 180, 30};
+SDL_Rect menuClearBg = {890, 605, 180, 30};
+
+bool backdropChooserOpen = false;
+
+SDL_Rect chooseBackdropBtn = {890, 620, 180, 30};
+
+SDL_Rect backdropWindow = {400, 150, 400, 300};
+
+SDL_Rect backdrop1Rect = {450, 250, 120, 90};
+SDL_Rect backdrop2Rect = {650, 250, 120, 90};
+
+SDL_Texture* backdrop1Tex = nullptr;
+SDL_Texture* backdrop2Tex = nullptr;
+
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
     TTF_Init();
@@ -56,6 +78,18 @@ int main(int argc, char* argv[]) {
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
     TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 14);
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
+
+    SDL_Surface* s1 = IMG_Load("assets/bg1.jpg");
+    if(s1){
+        backdrop1Tex=SDL_CreateTextureFromSurface(ren,s1);
+        SDL_FreeSurface(s1);
+    }
+
+    SDL_Surface* s2 = IMG_Load("assets/bg2.jpg");
+    if(s2){
+        backdrop2Tex=SDL_CreateTextureFromSurface(ren,s2);
+        SDL_FreeSurface(s2);
+    }
 
     Category currentCategory = MOTION;
     EditingField activeField = NONE;
@@ -193,6 +227,75 @@ int main(int argc, char* argv[]) {
 
             if (e.type == SDL_MOUSEBUTTONDOWN) {
                 SDL_Point p = {e.button.x, e.button.y};
+
+                if(backdropChooserOpen)
+                {
+
+                    if(SDL_PointInRect(&p,&backdrop1Rect))
+                    {
+                        backgroundTexture = backdrop1Tex;
+                        backdropChooserOpen=false;
+                    }
+
+                    else if(SDL_PointInRect(&p,&backdrop2Rect))
+                    {
+                        backgroundTexture = backdrop2Tex;
+                        backdropChooserOpen=false;
+                    }
+                }
+
+                if(bgMenuOpen)
+                {
+
+                    if(SDL_PointInRect(&p,&menuLoadBg))
+                    {
+                        char* path = openSpriteDialog();
+
+                        if(path)
+                        {
+                            SDL_Surface* img=IMG_Load(path);
+
+                            if(img)
+                            {
+                                if(backgroundTexture)
+                                    SDL_DestroyTexture(backgroundTexture);
+
+                                backgroundTexture=
+                                SDL_CreateTextureFromSurface(ren,img);
+
+                                SDL_FreeSurface(img);
+                            }
+                        }
+
+                        bgMenuOpen=false;
+                    }
+
+                    if(SDL_PointInRect(&p,&menuClearBg))
+                    {
+                        if(backgroundTexture)
+                            SDL_DestroyTexture(backgroundTexture);
+
+                        backgroundTexture=nullptr;
+
+                        bgMenuOpen=false;
+                    }
+
+                    if(SDL_PointInRect(&p,&chooseBackdropBtn))
+                    {
+                        bgMenuOpen=false;
+                        backdropChooserOpen=true;
+                    }
+
+                    bgMenuOpen=false;
+                }
+                int dx=p.x-bgBtnX;
+                int dy=p.y-bgBtnY;
+
+                if(dx*dx+dy*dy<=bgBtnR*bgBtnR)
+                {
+                    bgMenuOpen=true;
+                }
+
                 if (SDL_PointInRect(&p, &xBox)) { activeField = FIELD_X; paneBuffer = ""; SDL_StartTextInput(); }
                 else if (SDL_PointInRect(&p, &yBox)) { activeField = FIELD_Y; paneBuffer = ""; SDL_StartTextInput(); }
                 else if (SDL_PointInRect(&p, &sBox)) { activeField = FIELD_SIZE; paneBuffer = ""; SDL_StartTextInput(); }
@@ -201,18 +304,6 @@ int main(int argc, char* argv[]) {
                 else if (SDL_PointInRect(&p, &hideBtn)) { cat.visible = false; }
                 else { activeField = NONE; }
 
-                SDL_Rect loadBgBtn = {880, 660, 120, 35};
-                if (SDL_PointInRect(&p, &loadBgBtn)) {
-                    char* path = openSpriteDialog();
-                    if (path) {
-                        SDL_Surface* img = IMG_Load(path);
-                        if (img) {
-                            if(backgroundTexture) SDL_DestroyTexture(backgroundTexture);
-                            backgroundTexture = SDL_CreateTextureFromSurface(ren, img);
-                            SDL_FreeSurface(img);
-                        }
-                    }
-                }
 
                 SDL_Rect loadImageBtn = {880, 700, 120, 35};
                 if (SDL_PointInRect(&p, &loadImageBtn)) {
@@ -227,6 +318,7 @@ int main(int argc, char* argv[]) {
                     int cX = 40, cY = 50 + (i * 65);
                     if (sqrt(pow(p.x - cX, 2) + pow(p.y - cY, 2)) <= 20) currentCategory = static_cast<Category>(i);
                 }
+
 
                 SDL_Rect runBtn = {95, 600, 120, 35}, saveBtn = {95, 645, 120, 35}, loadBtn = {95, 690, 120, 35};
                 if (SDL_PointInRect(&p, &runBtn)) {
@@ -377,7 +469,7 @@ int main(int argc, char* argv[]) {
           else if (b.data.type == MOUSE_Y) {
               b.data.value = (float)(225 - my);
           }
-            // Calculate the difference between cat position and mouse position
+
           else if (b.data.type == DISTANCE_TO_MOUSE) {
               float dx = (float)mx - cat.x;
               float dy = (float)my - cat.y;
@@ -409,7 +501,6 @@ int main(int argc, char* argv[]) {
                 renderText(ren, font, t2, sq2.x + 5, sq2.y + 5, {0, 0, 0, 255});
                 renderText(ren, font, b.label, b.rect.x + 54, b.rect.y + 12, {255, 255, 255, 255});
 
-                //Calculation Logic (Math + Comparisons)
                 SDL_Rect middleArea = { b.rect.x + 50, b.rect.y, 20, 40 };
                 if (SDL_PointInRect(&mouseP, &middleArea)) {
                     std::string resultStr = "";
@@ -417,7 +508,7 @@ int main(int argc, char* argv[]) {
                     else if (b.data.type == OP_SUB) resultStr = std::to_string((int)(b.data.value - b.data.value2));
                     else if (b.data.type == OP_MUL) resultStr = std::to_string((int)(b.data.value * b.data.value2));
                     else if (b.data.type == OP_DIV && b.data.value2 != 0) resultStr = std::to_string((int)(b.data.value / b.data.value2));
-                    // COMPARISON LOGIC
+
                     else if (b.data.type == OP_GT) resultStr = (b.data.value > b.data.value2) ? "true" : "false";
                     else if (b.data.type == OP_LT) resultStr = (b.data.value < b.data.value2) ? "true" : "false";
                     else if (b.data.type == OP_EQU) resultStr = (b.data.value == b.data.value2) ? "true" : "false";
@@ -443,13 +534,52 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // GUI Buttons
         SDL_Rect runBtnRect = {95, 600, 120, 35}, saveBtnRect = {95, 645, 120, 35}, loadBtnRect = {95, 690, 120, 35};
         SDL_SetRenderDrawColor(ren, 50, 200, 50, 255); SDL_RenderFillRect(ren, &runBtnRect); renderText(ren, font, "RUN", 155, 610, {255, 255, 255, 255}, true);
         SDL_SetRenderDrawColor(ren, 100, 100, 100, 255); SDL_RenderFillRect(ren, &saveBtnRect); renderText(ren, font, "SAVE", 155, 655, {255, 255, 255, 255}, true);
-        SDL_RenderFillRect(ren, &loadBtnRect); renderText(ren, font, "LOAD", 155, 700, {255, 255, 255, 255}, true);
-        SDL_Rect loadBgBtn = {880, 660, 120, 35}; SDL_SetRenderDrawColor(ren, 255, 140, 26, 255); SDL_RenderFillRect(ren, &loadBgBtn); renderText(ren, font, "LOAD BACKGRND", 940, 670, {255, 255, 255, 255}, true);
+        SDL_RenderFillRect(ren, &loadBtnRect); renderText(ren, font, "LOAD", 155, 700, {255, 255, 255, 255}, true);SDL_SetRenderDrawColor(ren, 255, 140, 26, 255);
         SDL_Rect loadImageBtn = {880, 700, 120, 35}; SDL_SetRenderDrawColor(ren, 0, 150, 240, 255); SDL_RenderFillRect(ren, &loadImageBtn); renderText(ren, font, "LOAD COSTUME", 940, 710, {255, 255, 255, 255}, true);
+
+        filledCircleRGBA(ren,bgBtnX,bgBtnY,bgBtnR,255,140,26,255);
+
+        renderText(ren,font,"+",bgBtnX,bgBtnY-7,{255,255,255,255},true);
+
+        bgMenuRect = {880, 540, 200, 120};
+        if(bgMenuOpen)
+        {
+
+            SDL_SetRenderDrawColor(ren,255,255,255,255);
+            SDL_RenderFillRect(ren,&bgMenuRect);
+
+            SDL_SetRenderDrawColor(ren,100,100,100,255);
+            SDL_RenderDrawRect(ren,&bgMenuRect);
+
+            renderText(ren,font,"Load Background",895,555,{0,0,0,255});
+
+            renderText(ren,font,"Clear Background",895,590,{0,0,0,255});
+
+            renderText(ren,font,"Choose Backdrop",895,625,{0,0,0,255});
+
+        }
+
+        if(backdropChooserOpen)
+        {
+
+            SDL_SetRenderDrawColor(ren,220,220,220,255);
+            SDL_RenderFillRect(ren,&backdropWindow);
+
+            SDL_SetRenderDrawColor(ren,50,50,50,255);
+            SDL_RenderDrawRect(ren,&backdropWindow);
+
+            renderText(ren,font,"Choose a Backdrop",520,170,{0,0,0,255});
+
+            if(backdrop1Tex)
+                SDL_RenderCopy(ren,backdrop1Tex,nullptr,&backdrop1Rect);
+
+            if(backdrop2Tex)
+                SDL_RenderCopy(ren,backdrop2Tex,nullptr,&backdrop2Rect);
+
+        }
 
         if (cat.visible) cat.draw(ren);
         SDL_RenderPresent(ren);
