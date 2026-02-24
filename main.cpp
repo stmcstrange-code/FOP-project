@@ -20,7 +20,7 @@ enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y || type == BOUNCE) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE || type == CHANGE_SIZE ||type == SET_SIZE || type == SHOW || type ==HIDE)  return LOOKS;
-    if (type == TOUCHING_EDGE || type == GOTO_MOUSE || type == MOUSE_X || type == MOUSE_Y || type == DISTANCE_TO_MOUSE) return SENSING;
+    if (type == TOUCHING_EDGE || type == GOTO_MOUSE || type == MOUSE_X || type == MOUSE_Y || type == DISTANCE_TO_MOUSE || type == TOUCHING_MOUSE) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF) return CONTROL;
     if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
     if (type == PLAY_SOUND || type == SET_VOLUME || type == SET_PITCH) return SOUND;
@@ -108,11 +108,12 @@ int main(int argc, char* argv[]) {
         {{SET_VOLUME, 50, 0}, {95, 110, 120, 40}, {207, 99, 207, 255}, "SET VOLUME"},
         {{SET_PITCH, 1.0f, 0}, {95, 160, 120, 40}, {207, 99, 207, 255}, "SET PITCH"},
                      //---SENSING---
-        {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"},
+        {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "touch Edge?"},
         {{GOTO_MOUSE, 0, 0}, {95, 110, 120, 40}, {92, 177, 214, 255}, "go to mouse"},
         {{MOUSE_X, 0, 0}, {95, 160, 120, 40}, {92, 177, 214, 255}, "mouse x "},
         {{MOUSE_Y, 0, 0}, {95, 210, 120, 40}, {92, 177, 214, 255}, "mouse y "},
         {{DISTANCE_TO_MOUSE, 0, 0}, {95, 260, 120, 40}, {92, 177, 214, 255}, "dist to mouse "},
+        {{TOUCHING_MOUSE, 0, 0}, {95, 310, 120, 40}, {92, 177, 214, 255}, "touch mouse? "},
                      //---OPERATORS---
         {{OP_ADD, 0, 0}, {95, 60, 120, 40}, {92, 184, 92, 255}, "+"},
         {{OP_SUB, 0, 0}, {95, 110, 120, 40}, {92, 184, 92, 255}, "-"},
@@ -356,7 +357,7 @@ int main(int argc, char* argv[]) {
                         || b.data.type == SET_X || b.data.type == SET_VOLUME
                         || b.data.type == SET_PITCH || b.data.type == SET_SIZE
                         || b.data.type == CHANGE_SIZE || b.data.type == MOUSE_X
-                        || b.data.type == MOUSE_Y || b.data.type == DISTANCE_TO_MOUSE);
+                        || b.data.type == MOUSE_Y || b.data.type == DISTANCE_TO_MOUSE || b.data.type == TOUCHING_MOUSE);
                     std::string lbl = b.label + (hasNum && b.data.type != TOUCHING_EDGE ? std::to_string((int)b.data.value) : "");
                     renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
                 }
@@ -380,6 +381,13 @@ int main(int argc, char* argv[]) {
               float dy = (float)my - cat.y;
               b.data.value = sqrt(dx * dx + dy * dy);
           }
+            if (b.data.type == TOUCHING_MOUSE) {
+                bool isInside = (mx >= cat.x && mx <= cat.x + cat.w &&
+                                 my >= cat.y && my <= cat.y + cat.h);
+
+                b.data.value = isInside ? 1.0f : 0.0f;
+            }
+
             SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
             if (b.data.type >= OP_ADD && b.data.type <= OP_EQU) {
                 SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
@@ -420,7 +428,7 @@ int main(int argc, char* argv[]) {
                     || b.data.type == CHANGE_Y || b.data.type == SET_VOLUME
                     || b.data.type == SET_PITCH || b.data.type == SET_SIZE
                     || b.data.type == CHANGE_SIZE || b.data.type == MOUSE_X
-                    || b.data.type == MOUSE_Y || b.data.type == DISTANCE_TO_MOUSE);
+                    || b.data.type == MOUSE_Y || b.data.type == DISTANCE_TO_MOUSE || b.data.type == TOUCHING_MOUSE);
                 if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
                 renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
