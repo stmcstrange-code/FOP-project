@@ -20,7 +20,7 @@ enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y || type == BOUNCE) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE || type == CHANGE_SIZE ||type == SET_SIZE || type == SHOW || type ==HIDE)  return LOOKS;
-    if (type == TOUCHING_EDGE || type == GOTO_MOUSE || type == MOUSE_X || type == MOUSE_Y || type == DISTANCE_TO_MOUSE || type == TOUCHING_MOUSE) return SENSING;
+    if (type == TOUCHING_EDGE || type == GOTO_MOUSE || type == MOUSE_X || type == MOUSE_Y || type == DISTANCE_TO_MOUSE || type == TOUCHING_MOUSE || type == MOUSE_DOWN) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF) return CONTROL;
     if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
     if (type == PLAY_SOUND || type == SET_VOLUME || type == SET_PITCH) return SOUND;
@@ -114,6 +114,7 @@ int main(int argc, char* argv[]) {
         {{MOUSE_Y, 0, 0}, {95, 210, 120, 40}, {92, 177, 214, 255}, "mouse y "},
         {{DISTANCE_TO_MOUSE, 0, 0}, {95, 260, 120, 40}, {92, 177, 214, 255}, "dist to mouse "},
         {{TOUCHING_MOUSE, 0, 0}, {95, 310, 120, 40}, {92, 177, 214, 255}, "touch mouse? "},
+        {{MOUSE_DOWN, 0, 0}, {95, 360, 120, 40}, {92, 177, 214, 255}, "mouse down? "},
                      //---OPERATORS---
         {{OP_ADD, 0, 0}, {95, 60, 120, 40}, {92, 184, 92, 255}, "+"},
         {{OP_SUB, 0, 0}, {95, 110, 120, 40}, {92, 184, 92, 255}, "-"},
@@ -357,7 +358,8 @@ int main(int argc, char* argv[]) {
                         || b.data.type == SET_X || b.data.type == SET_VOLUME
                         || b.data.type == SET_PITCH || b.data.type == SET_SIZE
                         || b.data.type == CHANGE_SIZE || b.data.type == MOUSE_X
-                        || b.data.type == MOUSE_Y || b.data.type == DISTANCE_TO_MOUSE || b.data.type == TOUCHING_MOUSE);
+                        || b.data.type == MOUSE_Y || b.data.type == DISTANCE_TO_MOUSE
+                        || b.data.type == TOUCHING_MOUSE || b.data.type == MOUSE_DOWN);
                     std::string lbl = b.label + (hasNum && b.data.type != TOUCHING_EDGE ? std::to_string((int)b.data.value) : "");
                     renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
                 }
@@ -367,7 +369,7 @@ int main(int argc, char* argv[]) {
         int mx, my;
         SDL_GetMouseState(&mx, &my);
         SDL_Point mouseP = {mx, my};
-
+        Uint32 buttons = SDL_GetMouseState(&mx, &my);
         for (auto& b : workspaceBlocks) {
           if (b.data.type == MOUSE_X) {
           b.data.value = (float)(mx - 837);
@@ -386,6 +388,12 @@ int main(int argc, char* argv[]) {
                                  my >= cat.y && my <= cat.y + cat.h);
 
                 b.data.value = isInside ? 1.0f : 0.0f;
+            }
+            if (b.data.type == MOUSE_DOWN) {
+                // Check if the Left Mouse Button is pressed
+                bool isPressed = (buttons & SDL_BUTTON(SDL_BUTTON_LEFT));
+
+                b.data.value = isPressed ? 1.0f : 0.0f;
             }
 
             SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
@@ -428,7 +436,8 @@ int main(int argc, char* argv[]) {
                     || b.data.type == CHANGE_Y || b.data.type == SET_VOLUME
                     || b.data.type == SET_PITCH || b.data.type == SET_SIZE
                     || b.data.type == CHANGE_SIZE || b.data.type == MOUSE_X
-                    || b.data.type == MOUSE_Y || b.data.type == DISTANCE_TO_MOUSE || b.data.type == TOUCHING_MOUSE);
+                    || b.data.type == MOUSE_Y || b.data.type == DISTANCE_TO_MOUSE
+                    || b.data.type == TOUCHING_MOUSE || b.data.type == MOUSE_DOWN);
                 if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
                 renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
