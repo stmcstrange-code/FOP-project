@@ -39,7 +39,7 @@ enum BlockType {
     GOTO_MOUSE,
     OP_ADD, OP_SUB, OP_MUL, OP_DIV,
     OP_GT, OP_LT, OP_EQU,
-    MOUSE_X,MOUSE_Y
+    MOUSE_X,MOUSE_Y,DISTANCE_TO_MOUSE
 };
 
 
