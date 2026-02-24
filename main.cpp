@@ -21,11 +21,10 @@ Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y || type == BOUNCE) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE || type == CHANGE_SIZE ||type == SET_SIZE || type == SHOW || type ==HIDE)  return LOOKS;
     if (type == TOUCHING_EDGE || type == GOTO_MOUSE) return SENSING;
-    if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF)
-        return CONTROL;
+    if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF) return CONTROL;
     if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
     if (type == PLAY_SOUND || type == SET_VOLUME || type == SET_PITCH) return SOUND;
-    if (type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV) return OPERATORS;
+    if (type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV || type == OP_GT || type == OP_LT || type == OP_EQU) return OPERATORS;
     return MOTION;
 }
 
@@ -77,7 +76,7 @@ int main(int argc, char* argv[]) {
     SDL_Rect hideBtn = {750, 510, 35, 25};
 
     std::vector<VisualBlock> sidebarTemplates = {
-              //MOTION
+                     //---MOTION---
         {{MOVE, 40, 0}, {95, 60, 120, 40}, {76, 151, 255, 255}, "MOVE "},
         {{TURN, 15, 0}, {95, 110, 120, 40}, {76, 151, 255, 255}, "TURN "},
         {{GOTO_RANDOM, 0, 0}, {95, 160, 120, 40}, {76, 151, 255, 255}, "GO RANDOM"},
@@ -86,7 +85,7 @@ int main(int argc, char* argv[]) {
         {{CHANGE_Y, 10, 0}, {95, 310, 120, 40}, {76, 151, 255, 255}, "change y by "},
         {{SET_Y, 0, 0}, {95, 360, 120, 40}, {76, 151, 255, 255}, "set y to "},
         {{BOUNCE, 0, 0}, {95, 410, 120, 40}, {76, 151, 255, 255}, "if on edge,bounce"},
-             //LOOKS
+                     //---LOOKS---
         {{CHANGE_SIZE, 10, 0}, {95, 60, 120, 40}, {153, 102, 255, 255}, "change size by "},
         {{SET_SIZE, 100, 0}, {95, 110, 120, 40}, {153, 102, 255, 255}, "set size to "},
         {{PEN_DOWN, 0, 0}, {95, 160, 120, 40}, {64, 184, 158, 255}, "PEN DOWN"},
@@ -94,29 +93,33 @@ int main(int argc, char* argv[]) {
         {{ERASE, 0, 0}, {95, 260, 120, 40}, {255, 102, 102, 255}, "ERASE"},
         {{SHOW, 0, 0}, {95, 310, 120, 40}, {153, 102, 255, 255}, "SHOW"},
         {{HIDE, 0, 0}, {95, 360, 120, 40}, {153, 102, 255, 255}, "HIDE"},
-            //CONTROL
+                     //---CONTROL---
         {{WAIT, 1, 0}, {95, 60, 120, 40}, {255, 171, 25, 255}, "WAIT "},
         {{REPEAT, 4, 0}, {95, 110, 120, 40}, {255, 171, 25, 255}, "REPEAT "},
         {{END_LOOP, 0, 0}, {95, 160, 120, 40}, {255, 171, 25, 255}, "END LOOP"},
         {{IF, 10, 0}, {95, 210, 120, 40}, {255, 171, 25, 255}, "IF VAR > "},
         {{ELSE, 0, 0}, {95, 260, 120, 40}, {255, 171, 25, 255}, "ELSE"},
         {{END_IF, 0, 0}, {95, 310, 120, 40}, {255, 171, 25, 255}, "END IF"},
-           //VARIABLES
+                     //---VARIABLES---
         {{SET_VAR, 0, 0}, {95, 60, 120, 40}, {255, 140, 26, 255}, "SET TO "},
         {{CHANGE_VAR, 1, 0}, {95, 110, 120, 40}, {255, 140, 26, 255}, "CHANGE BY "},
-           //SOUND
+                     //---SOUND---
         {{PLAY_SOUND, 0, 0}, {95, 60, 120, 40}, {207, 99, 207, 255}, "PLAY SOUND"},
         {{SET_VOLUME, 50, 0}, {95, 110, 120, 40}, {207, 99, 207, 255}, "SET VOLUME"},
         {{SET_PITCH, 1.0f, 0}, {95, 160, 120, 40}, {207, 99, 207, 255}, "SET PITCH"},
-          //SENSING
+                     //---SENSING---
         {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "Touching Edge?"},
         {{GOTO_MOUSE, 0, 0}, {95, 110, 120, 40}, {92, 177, 214, 255}, "go to mouse"},
-          //OPERATORS
+                     //---OPERATORS---
         {{OP_ADD, 0, 0}, {95, 60, 120, 40}, {92, 184, 92, 255}, "+"},
         {{OP_SUB, 0, 0}, {95, 110, 120, 40}, {92, 184, 92, 255}, "-"},
         {{OP_MUL, 0, 0}, {95, 160, 120, 40}, {92, 184, 92, 255}, "*"},
-        {{OP_DIV, 0, 0}, {95, 210, 120, 40}, {92, 184, 92, 255}, "/"}
+        {{OP_DIV, 0, 0}, {95, 210, 120, 40}, {92, 184, 92, 255}, "/"},
+        {{OP_GT, 0, 0}, {95, 260, 120, 40}, {92, 184, 92, 255}, ">"},
+        {{OP_LT, 0, 0}, {95, 310, 120, 40}, {92, 184, 92, 255}, "<"},
+        {{OP_EQU, 0, 0}, {95, 360, 120, 40}, {92, 184, 92, 255}, "="}
     };
+
     struct CategoryUI { std::string name; SDL_Color color; };
     std::vector<CategoryUI> catUIs = {
         {"Motion", {60, 131, 253, 255}}, {"Looks", {153, 102, 255, 255}},
@@ -141,7 +144,6 @@ int main(int argc, char* argv[]) {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) quit = true;
-
             if (activeField != NONE) {
                 if (e.type == SDL_TEXTINPUT) {
                     if (isdigit(e.text.text[0]) || e.text.text[0] == '-' || e.text.text[0] == '.') paneBuffer += e.text.text;
@@ -186,7 +188,6 @@ int main(int argc, char* argv[]) {
 
             if (e.type == SDL_MOUSEBUTTONDOWN) {
                 SDL_Point p = {e.button.x, e.button.y};
-
                 if (SDL_PointInRect(&p, &xBox)) { activeField = FIELD_X; paneBuffer = ""; SDL_StartTextInput(); }
                 else if (SDL_PointInRect(&p, &yBox)) { activeField = FIELD_Y; paneBuffer = ""; SDL_StartTextInput(); }
                 else if (SDL_PointInRect(&p, &sBox)) { activeField = FIELD_SIZE; paneBuffer = ""; SDL_StartTextInput(); }
@@ -245,36 +246,24 @@ int main(int argc, char* argv[]) {
                 if (!activeDragBlock && !draggingCat) {
                     for (int i = (int)workspaceBlocks.size() - 1; i >= 0; i--) {
                         if (SDL_PointInRect(&p, &workspaceBlocks[i].rect)) {
-                            if (workspaceBlocks[i].data.type >= OP_ADD && workspaceBlocks[i].data.type <= OP_DIV) {
-                                if (p.x < workspaceBlocks[i].rect.x + 50) { // Clicked Left Hole
-                                    editingBlock = &workspaceBlocks[i];
-                                    editingBlock->isEditing = true;
-                                    editingBlock->isEditingValue2 = false;
-                                    editingBlock->editBuffer = "";
-                                    SDL_StartTextInput();
-                                } else if (p.x > workspaceBlocks[i].rect.x + 70) { // Clicked Right Hole
-                                    editingBlock = &workspaceBlocks[i];
-                                    editingBlock->isEditing = false;
-                                    editingBlock->isEditingValue2 = true;
-                                    editingBlock->editBuffer2 = "";
-                                    SDL_StartTextInput();
-                                } else { // Clicked Middle - Dragging
-                                    activeDragBlock = &workspaceBlocks[i];
-                                    activeDragBlock->isDragging = true;
-                                    dragOffsetX = p.x - activeDragBlock->rect.x;
-                                    dragOffsetY = p.y - activeDragBlock->rect.y;
-                                }
-                            } else { // Normal Block logic
-                                if (p.x > workspaceBlocks[i].rect.x + 80) {
-                                    editingBlock = &workspaceBlocks[i];
-                                    editingBlock->isEditing = true;
-                                    editingBlock->editBuffer = "";
-                                    SDL_StartTextInput();
+                            if (workspaceBlocks[i].data.type >= OP_ADD && workspaceBlocks[i].data.type <= OP_EQU) {
+                                if (p.x < workspaceBlocks[i].rect.x + 50) {
+                                    editingBlock = &workspaceBlocks[i]; editingBlock->isEditing = true;
+                                    editingBlock->isEditingValue2 = false; editingBlock->editBuffer = ""; SDL_StartTextInput();
+                                } else if (p.x > workspaceBlocks[i].rect.x + 70) {
+                                    editingBlock = &workspaceBlocks[i]; editingBlock->isEditing = false;
+                                    editingBlock->isEditingValue2 = true; editingBlock->editBuffer2 = ""; SDL_StartTextInput();
                                 } else {
-                                    activeDragBlock = &workspaceBlocks[i];
-                                    activeDragBlock->isDragging = true;
-                                    dragOffsetX = p.x - activeDragBlock->rect.x;
-                                    dragOffsetY = p.y - activeDragBlock->rect.y;
+                                    activeDragBlock = &workspaceBlocks[i]; activeDragBlock->isDragging = true;
+                                    dragOffsetX = p.x - activeDragBlock->rect.x; dragOffsetY = p.y - activeDragBlock->rect.y;
+                                }
+                            } else {
+                                if (p.x > workspaceBlocks[i].rect.x + 80) {
+                                    editingBlock = &workspaceBlocks[i]; editingBlock->isEditing = true;
+                                    editingBlock->editBuffer = ""; SDL_StartTextInput();
+                                } else {
+                                    activeDragBlock = &workspaceBlocks[i]; activeDragBlock->isDragging = true;
+                                    dragOffsetX = p.x - activeDragBlock->rect.x; dragOffsetY = p.y - activeDragBlock->rect.y;
                                 }
                             }
                             break;
@@ -320,11 +309,10 @@ int main(int argc, char* argv[]) {
         SDL_SetRenderDrawColor(ren, 200, 200, 200, 255);
         SDL_RenderDrawLine(ren, 230, 0, 230, 768); SDL_RenderDrawLine(ren, 650, 0, 650, 768);
         SDL_RenderDrawLine(ren, 650, 450, 1024, 450);
-
+        // Stage Inputs
         SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
         SDL_RenderFillRect(ren, &xBox); SDL_RenderFillRect(ren, &yBox); SDL_RenderFillRect(ren, &sBox); SDL_RenderFillRect(ren, &dBox);
         SDL_RenderFillRect(ren, &showBtn); SDL_RenderFillRect(ren, &hideBtn);
-
         SDL_SetRenderDrawColor(ren, 220, 220, 220, 255);
         SDL_RenderDrawRect(ren, &xBox); SDL_RenderDrawRect(ren, &yBox); SDL_RenderDrawRect(ren, &sBox); SDL_RenderDrawRect(ren, &dBox);
         SDL_RenderDrawRect(ren, &showBtn); SDL_RenderDrawRect(ren, &hideBtn);
@@ -336,7 +324,6 @@ int main(int argc, char* argv[]) {
         renderText(ren, font, (activeField == FIELD_SIZE ? paneBuffer + "|" : std::to_string((int)cat.size)), 860, 475, {0,0,0,255});
         renderText(ren, font, "Dir", 925, 475, {150, 150, 150, 255});
         renderText(ren, font, (activeField == FIELD_DIR ? paneBuffer + "|" : std::to_string((int)cat.angle)), 960, 475, {0,0,0,255});
-
         renderText(ren, font, "Show", 665, 515, {150, 150, 150, 255});
         renderText(ren, font, "O", 722, 515, (cat.visible ? SDL_Color{0,150,255,255} : SDL_Color{100,100,100,255}));
         renderText(ren, font, "/", 762, 515, (!cat.visible ? SDL_Color{0,150,255,255} : SDL_Color{100,100,100,255}));
@@ -348,32 +335,34 @@ int main(int argc, char* argv[]) {
             renderText(ren, font, catUIs[i].name, cX, cY + 22, {80, 80, 80, 255}, true);
         }
 
-        // Sidebar Templates
         for (auto& b : sidebarTemplates) {
             if (getCategory(b.data.type) == currentCategory) {
                 SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
-                if (b.data.type >= OP_ADD && b.data.type <= OP_DIV) {
+                if (b.data.type >= OP_ADD && b.data.type <= OP_EQU) {
                     SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
                     SDL_Rect sq1 = { b.rect.x + 10, b.rect.y + 5, 40, 30 };
                     SDL_Rect sq2 = { b.rect.x + 70, b.rect.y + 5, 40, 30 };
                     SDL_RenderFillRect(ren, &sq1); SDL_RenderFillRect(ren, &sq2);
                     renderText(ren, font, b.label, b.rect.x + 54, b.rect.y + 12, {255, 255, 255, 255});
                 } else {
-                    bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_Y || b.data.type == CHANGE_Y || b.data.type == SET_X|| b.data.type == SET_VOLUME|| b.data.type == SET_PITCH || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
+                    bool hasNum = (b.data.type == MOVE || b.data.type == TURN
+                        || b.data.type == WAIT || b.data.type == REPEAT
+                        || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
+                        || b.data.type == IF || b.data.type == CHANGE_X
+                        || b.data.type == SET_Y || b.data.type == CHANGE_Y
+                        || b.data.type == SET_X|| b.data.type == SET_VOLUME
+                        || b.data.type == SET_PITCH || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
                     std::string lbl = b.label + (hasNum && b.data.type != TOUCHING_EDGE ? std::to_string((int)b.data.value) : "");
                     renderText(ren, font, lbl, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
                 }
             }
         }
 
-        // Workspace Blocks
-        int mx, my;
-        SDL_GetMouseState(&mx, &my);
-        SDL_Point mouseP = {mx, my};
+        int mx, my; SDL_GetMouseState(&mx, &my); SDL_Point mouseP = {mx, my};
 
         for (auto& b : workspaceBlocks) {
             SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255); SDL_RenderFillRect(ren, &b.rect);
-            if (b.data.type >= OP_ADD && b.data.type <= OP_DIV) {
+            if (b.data.type >= OP_ADD && b.data.type <= OP_EQU) {
                 SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
                 SDL_Rect sq1 = { b.rect.x + 10, b.rect.y + 5, 40, 30 };
                 SDL_Rect sq2 = { b.rect.x + 70, b.rect.y + 5, 40, 30 };
@@ -385,29 +374,40 @@ int main(int argc, char* argv[]) {
                 renderText(ren, font, t2, sq2.x + 5, sq2.y + 5, {0, 0, 0, 255});
                 renderText(ren, font, b.label, b.rect.x + 54, b.rect.y + 12, {255, 255, 255, 255});
 
-                // Hover Calculation Logic
+                //Calculation Logic (Math + Comparisons)
                 SDL_Rect middleArea = { b.rect.x + 50, b.rect.y, 20, 40 };
                 if (SDL_PointInRect(&mouseP, &middleArea)) {
-                    float result = 0;
-                    if (b.data.type == OP_ADD) result = b.data.value + b.data.value2;
-                    else if (b.data.type == OP_SUB) result = b.data.value - b.data.value2;
-                    else if (b.data.type == OP_MUL) result = b.data.value * b.data.value2;
-                    else if (b.data.type == OP_DIV && b.data.value2 != 0) result = b.data.value / b.data.value2;
+                    std::string resultStr = "";
+                    if (b.data.type == OP_ADD) resultStr = std::to_string((int)(b.data.value + b.data.value2));
+                    else if (b.data.type == OP_SUB) resultStr = std::to_string((int)(b.data.value - b.data.value2));
+                    else if (b.data.type == OP_MUL) resultStr = std::to_string((int)(b.data.value * b.data.value2));
+                    else if (b.data.type == OP_DIV && b.data.value2 != 0) resultStr = std::to_string((int)(b.data.value / b.data.value2));
+                    // COMPARISON LOGIC
+                    else if (b.data.type == OP_GT) resultStr = (b.data.value > b.data.value2) ? "true" : "false";
+                    else if (b.data.type == OP_LT) resultStr = (b.data.value < b.data.value2) ? "true" : "false";
+                    else if (b.data.type == OP_EQU) resultStr = (b.data.value == b.data.value2) ? "true" : "false";
 
-                    SDL_Rect resRect = { b.rect.x + 40, b.rect.y + 45, 40, 25 };
+                    SDL_Rect resRect = { b.rect.x + 30, b.rect.y + 45, 60, 25 };
                     SDL_SetRenderDrawColor(ren, 100, 100, 100, 255); SDL_RenderFillRect(ren, &resRect);
-                    renderText(ren, font, std::to_string((int)result), resRect.x + 20, resRect.y + 5, {255, 255, 255, 255}, true);
+                    renderText(ren, font, resultStr, resRect.x + 30, resRect.y + 5, {255, 255, 255, 255}, true);
                 }
             } else {
                 std::string t = b.label;
-                bool hasNum = (b.data.type == MOVE || b.data.type == TURN || b.data.type == WAIT || b.data.type == REPEAT || b.data.type == SET_VAR || b.data.type == CHANGE_VAR || b.data.type == IF || b.data.type == CHANGE_X || b.data.type == SET_X || b.data.type == SET_Y || b.data.type == CHANGE_Y || b.data.type == SET_VOLUME|| b.data.type == SET_PITCH || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
+                bool hasNum = (b.data.type == MOVE || b.data.type == TURN
+                    || b.data.type == WAIT || b.data.type == REPEAT
+                    || b.data.type == SET_VAR || b.data.type == CHANGE_VAR
+                    || b.data.type == IF || b.data.type == CHANGE_X
+                    || b.data.type == SET_X || b.data.type == SET_Y
+                    || b.data.type == CHANGE_Y || b.data.type == SET_VOLUME
+                    || b.data.type == SET_PITCH || b.data.type == SET_SIZE || b.data.type == CHANGE_SIZE);
                 if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
                 renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
         }
 
+        // GUI Buttons
         SDL_Rect runBtnRect = {95, 600, 120, 35}, saveBtnRect = {95, 645, 120, 35}, loadBtnRect = {95, 690, 120, 35};
-        SDL_SetRenderDrawColor(ren, 50, 200, 50, 255); SDL_RenderFillRect(ren, &runBtnRect); renderText(ren, font, "GO / RUN", 155, 610, {255, 255, 255, 255}, true);
+        SDL_SetRenderDrawColor(ren, 50, 200, 50, 255); SDL_RenderFillRect(ren, &runBtnRect); renderText(ren, font, "RUN", 155, 610, {255, 255, 255, 255}, true);
         SDL_SetRenderDrawColor(ren, 100, 100, 100, 255); SDL_RenderFillRect(ren, &saveBtnRect); renderText(ren, font, "SAVE", 155, 655, {255, 255, 255, 255}, true);
         SDL_RenderFillRect(ren, &loadBtnRect); renderText(ren, font, "LOAD", 155, 700, {255, 255, 255, 255}, true);
         SDL_Rect loadBgBtn = {880, 660, 120, 35}; SDL_SetRenderDrawColor(ren, 255, 140, 26, 255); SDL_RenderFillRect(ren, &loadBgBtn); renderText(ren, font, "LOAD BACKGRND", 940, 670, {255, 255, 255, 255}, true);

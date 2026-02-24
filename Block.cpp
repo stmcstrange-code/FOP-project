@@ -176,11 +176,11 @@ case BOUNCE: {
     }
     break;
 }
-         case SET_Y: {
+    case SET_Y: {
     s.y = 225 - b.value;
     break;
                  }
-            case SET_X: {
+    case SET_X: {
             // If input is 0, screen x becomes 837
             s.x = 837 + b.value;
             break;
@@ -217,6 +217,16 @@ case BOUNCE: {
             else
                 pm.variables.vars["my variable"] = 0;
             break;
+        case OP_GT:
+            std::cout << (b.value > b.value2 ? "True" : "False") << std::endl;
+            break;
+        case OP_LT:
+            std::cout << (b.value < b.value2 ? "True" : "False") << std::endl;
+            break;
+        case OP_EQU:
+            std::cout << (b.value == b.value2 ? "True" : "False") << std::endl;
+            break;
+
 
     }
     if (!jumped) currentStep++;

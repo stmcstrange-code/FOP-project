@@ -37,7 +37,8 @@ enum BlockType {
     SHOW,
     HIDE,
     GOTO_MOUSE,
-    OP_ADD, OP_SUB, OP_MUL, OP_DIV
+    OP_ADD, OP_SUB, OP_MUL, OP_DIV,
+    OP_GT, OP_LT, OP_EQU
 };
 
 
