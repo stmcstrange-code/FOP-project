@@ -91,18 +91,19 @@ int bgBtnY = 640;
 int bgBtnR = 18;
 
 SDL_Rect bgMenuRect = {880, 540, 200, 120};
-SDL_Rect menuLoadBg = {890, 585, 180, 30};
-SDL_Rect menuClearBg = {890, 605, 180, 30};
+SDL_Rect menuLoadBg={890,550,180,30};
+SDL_Rect menuClearBg={890,585,180,30};
 
 bool backdropChooserOpen = false;
 
-SDL_Rect chooseBackdropBtn = {890, 620, 180, 30};
+SDL_Rect chooseBackdropBtn={890,620,180,30};
 
 SDL_Rect backdropWindow = {400, 150, 400, 300};
 
 SDL_Rect backdrop1Rect = {450, 250, 120, 90};
 SDL_Rect backdrop2Rect = {650, 250, 120, 90};
 
+SDL_Texture* backgroundTexture = nullptr;
 SDL_Texture* backdrop1Tex = nullptr;
 SDL_Texture* backdrop2Tex = nullptr;
 
@@ -122,13 +123,13 @@ int main(int argc, char* argv[]) {
     TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 14);
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
 
-    SDL_Surface* s1 = IMG_Load("assets/bg1.jpg");
+    SDL_Surface* s1 = IMG_Load("bg1.png");
     if(s1){
         backdrop1Tex=SDL_CreateTextureFromSurface(ren,s1);
         SDL_FreeSurface(s1);
     }
 
-    SDL_Surface* s2 = IMG_Load("assets/bg2.jpg");
+    SDL_Surface* s2 = IMG_Load("bg2.png");
     if(s2){
         backdrop2Tex=SDL_CreateTextureFromSurface(ren,s2);
         SDL_FreeSurface(s2);
@@ -307,7 +308,7 @@ int main(int argc, char* argv[]) {
 
                             if(img)
                             {
-                                if(backgroundTexture)
+                                if(backgroundTexture &&backgroundTexture!=backdrop1Tex &&backgroundTexture!=backdrop2Tex)
                                     SDL_DestroyTexture(backgroundTexture);
 
                                 backgroundTexture=
@@ -322,7 +323,7 @@ int main(int argc, char* argv[]) {
 
                     if(SDL_PointInRect(&p,&menuClearBg))
                     {
-                        if(backgroundTexture)
+                        if(backgroundTexture &&backgroundTexture!=backdrop1Tex &&backgroundTexture!=backdrop2Tex)
                             SDL_DestroyTexture(backgroundTexture);
 
                         backgroundTexture=nullptr;
