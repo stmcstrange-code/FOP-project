@@ -692,7 +692,7 @@ int main(int argc, char* argv[]) {
             cat.draw(ren);
         }
 
-        if ( !cat.bubbleText.empty()) {
+        if ( !cat.bubbleText.empty() && cat.isVisible) {
             SDL_Rect spriteRect = {(int)cat.x - 30, (int)cat.y - 30, 60, 60};
 
             SDL_Rect textRect;
