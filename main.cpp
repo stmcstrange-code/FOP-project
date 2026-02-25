@@ -20,7 +20,7 @@ enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y || type == BOUNCE) return MOTION;
     if (type == PEN_DOWN || type == PEN_UP || type == ERASE || type == CHANGE_SIZE ||type == SET_SIZE || type == SHOW || type ==HIDE|| type==THINK || type==SAY)  return LOOKS;
-    if (type == TOUCHING_EDGE || type == GOTO_MOUSE || type == MOUSE_X || type == MOUSE_Y || type == DISTANCE_TO_MOUSE || type == TOUCHING_MOUSE || type == MOUSE_DOWN) return SENSING;
+    if (type == GOTO_MOUSE || type == MOUSE_X || type == MOUSE_Y || type == DISTANCE_TO_MOUSE || type == TOUCHING_MOUSE || type == MOUSE_DOWN) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF) return CONTROL;
     if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
     if (type == PLAY_SOUND || type == SET_VOLUME || type == SET_PITCH) return SOUND;
@@ -188,13 +188,13 @@ int main(int argc, char* argv[]) {
         {{SET_VOLUME, 50, 0}, {95, 110, 120, 40}, {207, 99, 207, 255}, "SET VOLUME"},
         {{SET_PITCH, 1.0f, 0}, {95, 160, 120, 40}, {207, 99, 207, 255}, "SET PITCH"},
                      //---SENSING---
-        {{TOUCHING_EDGE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "touch Edge?"},
-        {{GOTO_MOUSE, 0, 0}, {95, 110, 120, 40}, {92, 177, 214, 255}, "go to mouse"},
-        {{MOUSE_X, 0, 0}, {95, 160, 120, 40}, {92, 177, 214, 255}, "mouse x "},
-        {{MOUSE_Y, 0, 0}, {95, 210, 120, 40}, {92, 177, 214, 255}, "mouse y "},
-        {{DISTANCE_TO_MOUSE, 0, 0}, {95, 260, 120, 40}, {92, 177, 214, 255}, "dist to mouse "},
-        {{TOUCHING_MOUSE, 0, 0}, {95, 310, 120, 40}, {92, 177, 214, 255}, "touch mouse? "},
-        {{MOUSE_DOWN, 0, 0}, {95, 360, 120, 40}, {92, 177, 214, 255}, "mouse down? "},
+
+      {{GOTO_MOUSE, 0, 0}, {95, 60, 120, 40}, {92, 177, 214, 255}, "go to mouse"},
+      {{MOUSE_X, 0, 0}, {95, 110, 120, 40}, {92, 177, 214, 255}, "mouse x "},
+      {{MOUSE_Y, 0, 0}, {95, 160, 120, 40}, {92, 177, 214, 255}, "mouse y "},
+      {{DISTANCE_TO_MOUSE, 0, 0}, {95, 210, 120, 40}, {92, 177, 214, 255}, "dist to mouse "},
+      {{TOUCHING_MOUSE, 0, 0}, {95, 260, 120, 40}, {92, 177, 214, 255}, "touch mouse? "},
+      {{MOUSE_DOWN, 0, 0}, {95, 310, 120, 40}, {92, 177, 214, 255}, "mouse down? "},
                      //---OPERATORS---
         {{OP_ADD, 0, 0}, {95, 60, 120, 40}, {92, 184, 92, 255}, "+"},
         {{OP_SUB, 0, 0}, {95, 110, 120, 40}, {92, 184, 92, 255}, "-"},
