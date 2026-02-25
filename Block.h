@@ -44,7 +44,6 @@ enum BlockType {
     SAY
 };
 
-
 struct Block {
     BlockType type;
     float value;

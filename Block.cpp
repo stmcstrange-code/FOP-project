@@ -236,7 +236,6 @@ case BOUNCE: {
             s.bubbleText = b.text;
             break;
         }
-
     }
     if (!jumped) currentStep++;
 

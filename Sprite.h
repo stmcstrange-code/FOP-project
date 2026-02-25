@@ -37,5 +37,4 @@ struct Sprite{
     int bubbleType;
     std::string bubbleText = "";
 };
-
 #endif

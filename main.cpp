@@ -685,7 +685,6 @@ int main(int argc, char* argv[]) {
 
             if(backdrop2Tex)
                 SDL_RenderCopy(ren,backdrop2Tex,nullptr,&backdrop2Rect);
-
         }
 
         if (cat.visible) {
