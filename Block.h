@@ -41,7 +41,8 @@ enum BlockType {
     OP_GT, OP_LT, OP_EQU,
     MOUSE_X,MOUSE_Y,DISTANCE_TO_MOUSE,TOUCHING_MOUSE,MOUSE_DOWN,
     THINK,
-    SAY
+    SAY,
+    WHEN_GREEN_FLAG
 };
 
 struct Block {

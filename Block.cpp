@@ -150,26 +150,22 @@ void executeNext(ProgramManager& pm, Sprite& s, Sound& meow, int& currentStep) {
                 }
 case BOUNCE: {
     bool hit = false;
-    // LEFT Wall (650)
     if (s.x <= 650) {
         s.angle = 180 - s.angle;
         s.x = 651;
         hit = true;
     }
-    // RIGHT Wall (1024)
     else if (s.x >= 974) {
         s.angle = 180 - s.angle;
         s.x = 973;
         hit = true;
     }
 
-    // TOP Wall (0)
     if (s.y <= 0) {
         s.angle = -s.angle;
         s.y = 1;
         hit = true;
     }
-    // BOTTOM Wall (450)
     else if (s.y >= 400) {
         s.angle = -s.angle;
         s.y = 399;
@@ -182,7 +178,6 @@ case BOUNCE: {
     break;
                  }
     case SET_X: {
-            // If input is 0, screen x becomes 837
             s.x = 837 + b.value;
             break;
                     }
@@ -236,10 +231,11 @@ case BOUNCE: {
             s.bubbleText = b.text;
             break;
         }
+        case WHEN_GREEN_FLAG:
+            break;
     }
     if (!jumped) currentStep++;
 
-    //Infinite Loop Watchdog
     static int instructionsThisFrame = 0;
     instructionsThisFrame++;
     if (instructionsThisFrame > 500) {
