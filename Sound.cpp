@@ -33,7 +33,7 @@ void setVolume(Sound& sound, int volume) {
 void setPitch(Sound& sound, float pitch) {
     if (!sound.chunk) return;
 
-    if ( pitch<=0.5f) pitch = 0.5f;
+    if ( pitch<=0.5f) pitch = 0.6f;
     if (pitch> 5.0f) pitch = 5.0f;
 
     if (sound.channel != -1) Mix_HaltChannel(sound.channel);
