@@ -236,6 +236,7 @@ case BOUNCE: {
     }
     if (!jumped) currentStep++;
 
+    //Infinite Loop Watchdog
     static int instructionsThisFrame = 0;
     instructionsThisFrame++;
     if (instructionsThisFrame > 500) {
