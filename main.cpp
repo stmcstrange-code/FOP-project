@@ -123,13 +123,13 @@ int main(int argc, char* argv[]) {
     TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 14);
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
 
-    SDL_Surface* s1 = IMG_Load("bg1.png");
+    SDL_Surface* s1 = IMG_Load("assets/bkground1.bmp");
     if(s1){
         backdrop1Tex=SDL_CreateTextureFromSurface(ren,s1);
         SDL_FreeSurface(s1);
     }
 
-    SDL_Surface* s2 = IMG_Load("bg2.png");
+    SDL_Surface* s2 = IMG_Load("assets/bkground2.bmp");
     if(s2){
         backdrop2Tex=SDL_CreateTextureFromSurface(ren,s2);
         SDL_FreeSurface(s2);
