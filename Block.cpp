@@ -231,8 +231,6 @@ case BOUNCE: {
             s.bubbleText = b.text;
             break;
         }
-        case WHEN_GREEN_FLAG:
-            break;
     }
     if (!jumped) currentStep++;
 
