@@ -39,7 +39,9 @@ enum BlockType {
     GOTO_MOUSE,
     OP_ADD, OP_SUB, OP_MUL, OP_DIV,
     OP_GT, OP_LT, OP_EQU,
-    MOUSE_X,MOUSE_Y,DISTANCE_TO_MOUSE,TOUCHING_MOUSE,MOUSE_DOWN
+    MOUSE_X,MOUSE_Y,DISTANCE_TO_MOUSE,TOUCHING_MOUSE,MOUSE_DOWN,
+    THINK,
+    SAY
 };
 
 
@@ -50,6 +52,8 @@ struct Block {
     int iterations = 0;
     int jumpTo = -1;
     std::string soundName;
+    std::string text="";
+
 };
 
 

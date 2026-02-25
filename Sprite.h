@@ -34,6 +34,8 @@ struct Sprite{
         SDL_Point p = {mx, my};
         return SDL_PointInRect(&p, &rect);
     }
+    int bubbleType;
+    std::string bubbleText = "";
 };
 
 #endif

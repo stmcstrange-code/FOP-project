@@ -227,7 +227,15 @@ case BOUNCE: {
         case OP_EQU:
             std::cout << (b.value == b.value2 ? "True" : "False") << std::endl;
             break;
-
+        case THINK: {
+            s.bubbleText = b.text;
+            break;
+        }
+        case SAY:
+        {
+            s.bubbleText = b.text;
+            break;
+        }
 
     }
     if (!jumped) currentStep++;

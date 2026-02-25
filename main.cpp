@@ -19,7 +19,7 @@ enum EditingField { NONE, FIELD_X, FIELD_Y, FIELD_SIZE, FIELD_DIR };
 
 Category getCategory(BlockType type) {
     if (type == MOVE || type == TURN || type == GOTO_RANDOM || type == CHANGE_X || type == SET_X || type == CHANGE_Y || type == SET_Y || type == BOUNCE) return MOTION;
-    if (type == PEN_DOWN || type == PEN_UP || type == ERASE || type == CHANGE_SIZE ||type == SET_SIZE || type == SHOW || type ==HIDE)  return LOOKS;
+    if (type == PEN_DOWN || type == PEN_UP || type == ERASE || type == CHANGE_SIZE ||type == SET_SIZE || type == SHOW || type ==HIDE|| type==THINK || type==SAY)  return LOOKS;
     if (type == TOUCHING_EDGE || type == GOTO_MOUSE || type == MOUSE_X || type == MOUSE_Y || type == DISTANCE_TO_MOUSE || type == TOUCHING_MOUSE || type == MOUSE_DOWN) return SENSING;
     if (type == REPEAT || type == END_LOOP || type == WAIT || type == IF || type == ELSE || type == END_IF) return CONTROL;
     if (type == SET_VAR || type == CHANGE_VAR) return VARIABLES;
@@ -39,7 +39,49 @@ void renderText(SDL_Renderer* ren, TTF_Font* font, std::string text, int x, int 
     SDL_FreeSurface(surf);
     SDL_DestroyTexture(tex);
 }
+SDL_Texture* createTextTexture( SDL_Renderer* renderer, TTF_Font* font, const std::string& text, SDL_Rect& textRect) {
+    SDL_Color color = {0, 0, 0, 255};
 
+    SDL_Surface* surface =TTF_RenderText_Blended(font, text.c_str(), color);
+
+    if (!surface) return nullptr;
+
+    SDL_Texture* texture =SDL_CreateTextureFromSurface(renderer, surface);
+
+    textRect.w = surface->w;
+    textRect.h = surface->h;
+
+    SDL_FreeSurface(surface);
+    return texture;
+}
+
+void renderBubble( SDL_Renderer* renderer, SDL_Rect spriteRect,SDL_Texture* textTexture,SDL_Rect textRect, int type) {
+    SDL_Rect bubbleRect;
+    bubbleRect.x = spriteRect.x + 40;
+    bubbleRect.y = spriteRect.y - 60;
+    bubbleRect.w = textRect.w + 20;
+    bubbleRect.h = textRect.h + 20;
+
+    if (type == 1 ) {
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderFillRect(renderer, &bubbleRect);
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderDrawRect(renderer, &bubbleRect);
+    }
+    else if (type == 2 ) {
+        filledEllipseRGBA(renderer,bubbleRect.x + bubbleRect.w/2,bubbleRect.y + bubbleRect.h/2,bubbleRect.w/2,bubbleRect.h/2,255,255,255,255);
+        ellipseRGBA(renderer,bubbleRect.x + bubbleRect.w/2,bubbleRect.y + bubbleRect.h/2,bubbleRect.w/2,bubbleRect.h/2,0,0,0,255);
+    }
+
+    SDL_Rect finalTextRect;
+    finalTextRect.x = bubbleRect.x + 10;
+    finalTextRect.y = bubbleRect.y + 10;
+    finalTextRect.w = textRect.w;
+    finalTextRect.h = textRect.h;
+
+    SDL_RenderCopy(renderer, textTexture, NULL, &finalTextRect);
+}
 Sound meow;
 
 bool bgMenuOpen = false;
@@ -67,6 +109,7 @@ SDL_Texture* backdrop2Tex = nullptr;
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
     TTF_Init();
+    SDL_StartTextInput();
 
     if ( Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT,2,2048) <0) {
         std::cerr << "Error opening audio mixer" << std::endl;
@@ -127,6 +170,8 @@ int main(int argc, char* argv[]) {
         {{ERASE, 0, 0}, {95, 260, 120, 40}, {255, 102, 102, 255}, "ERASE"},
         {{SHOW, 0, 0}, {95, 310, 120, 40}, {153, 102, 255, 255}, "SHOW"},
         {{HIDE, 0, 0}, {95, 360, 120, 40}, {153, 102, 255, 255}, "HIDE"},
+        {{SAY, 0, 0}, {95, 410, 120, 40}, {153, 102, 255, 255}, "SAY"},
+        {{THINK, 0, 0}, {95, 460, 120, 40}, {153, 102, 255, 255}, "THINK"},
                      //---CONTROL---
         {{WAIT, 1, 0}, {95, 60, 120, 40}, {255, 171, 25, 255}, "WAIT "},
         {{REPEAT, 4, 0}, {95, 110, 120, 40}, {255, 171, 25, 255}, "REPEAT "},
@@ -178,6 +223,11 @@ int main(int argc, char* argv[]) {
     ProgramManager manager;
     bool isRunning = false, quit = false, draggingCat = false;
     int currentStep = 0;
+
+    cat.bubbleText = "";
+    std::string currentInput = "";
+    bool typingMode = false;
+    Block* selectedBlock = nullptr;
 
     while (!quit) {
         SDL_Event e;
@@ -367,6 +417,51 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
+                if (!workspaceBlocks.empty() ) {
+                    for (int i =(int) workspaceBlocks.size() - 1; i >= 0; i--) {
+
+                        SDL_Rect textArea = {workspaceBlocks[i].rect.x + 80, workspaceBlocks[i].rect.y, 80, workspaceBlocks[i].rect.h};
+
+                        if (SDL_PointInRect(&p, &textArea)) {
+                            BlockType t = workspaceBlocks[i].data.type;
+
+                            if (t == SAY || t == THINK) {
+                                typingMode = true;
+                                currentInput = workspaceBlocks[i].data.text;
+                                selectedBlock = &workspaceBlocks[i].data;
+                            }
+                           if (t == SAY) {
+                            cat.bubbleText = workspaceBlocks[i].data.text;
+                            cat.bubbleType = 1;
+                        }
+                        else if ( t == THINK) {
+                            cat.bubbleText = workspaceBlocks[i].data.text;
+                            cat.bubbleType = 2;
+                        }
+                        }
+
+                    }
+                }
+            }
+
+
+            if (e.type == SDL_TEXTINPUT && typingMode) {
+                currentInput += e.text.text;
+            }
+            if (e.type == SDL_KEYDOWN && typingMode) {
+                if (e.key.keysym.sym == SDLK_BACKSPACE && !currentInput.empty()) {
+                    currentInput.pop_back();
+                }
+
+                if (e.key.keysym.sym == SDLK_RETURN) {
+                    if (selectedBlock != nullptr) {
+                        selectedBlock->text = currentInput;
+                    }
+
+                    typingMode = false;
+                    selectedBlock = nullptr;
+                    currentInput = "";
+                }
             }
 
             if (e.type == SDL_MOUSEMOTION) {
@@ -463,6 +558,9 @@ int main(int argc, char* argv[]) {
         SDL_Point mouseP = {mx, my};
         Uint32 buttons = SDL_GetMouseState(&mx, &my);
         for (auto& b : workspaceBlocks) {
+            SDL_SetRenderDrawColor(ren, b.color.r, b.color.g, b.color.b, 255);
+            SDL_RenderFillRect(ren, &b.rect);
+            std::string t = b.label;
           if (b.data.type == MOUSE_X) {
           b.data.value = (float)(mx - 837);
         }
@@ -532,6 +630,15 @@ int main(int argc, char* argv[]) {
                 if (hasNum && b.data.value != 999) t += b.isEditing ? b.editBuffer + "|" : std::to_string((int)b.data.value);
                 renderText(ren, font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
             }
+
+
+            if (b.data.type == SAY || b.data.type == THINK) {
+                if (typingMode && selectedBlock == &b.data) t +=currentInput + "|" ;
+                else
+                    t+=b.data.text;
+            }
+            renderText(ren,font, t, b.rect.x + 10, b.rect.y + 10, {255, 255, 255, 255});
+
         }
 
         SDL_Rect runBtnRect = {95, 600, 120, 35}, saveBtnRect = {95, 645, 120, 35}, loadBtnRect = {95, 690, 120, 35};
@@ -581,7 +688,20 @@ int main(int argc, char* argv[]) {
 
         }
 
-        if (cat.visible) cat.draw(ren);
+        if (cat.visible) {
+            cat.draw(ren);
+        }
+
+        if ( !cat.bubbleText.empty()) {
+            SDL_Rect spriteRect = {(int)cat.x - 30, (int)cat.y - 30, 60, 60};
+
+            SDL_Rect textRect;
+            SDL_Texture* textTexture =createTextTexture(ren, font, cat.bubbleText, textRect);
+
+            renderBubble(ren, spriteRect, textTexture, textRect , cat.bubbleType);
+            SDL_DestroyTexture(textTexture);
+
+        }
         SDL_RenderPresent(ren);
     }
     if (font) TTF_CloseFont(font);
