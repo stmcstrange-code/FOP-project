@@ -490,6 +490,7 @@ int main(int argc, char* argv[]) {
 
         if (isRunning && currentStep < (int)manager.script.size()) {
             executeNext(manager, cat, meow, currentStep);
+            cat.checkBoundaries(1024, 480, 650);
             SDL_Delay(100);
         } else isRunning = false;
 
